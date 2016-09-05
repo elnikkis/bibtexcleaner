@@ -83,17 +83,19 @@ def parse_args():
     import argparse
     parser = argparse.ArgumentParser(description='Bibtex cleaner')
     parser.add_argument('bibfile', type=argparse.FileType('r'),
-                        help='汚いbibファイル（入力ファイル名）')
+                        help='汚いbibファイル（入力ファイル名; default: stdin）',
+                        default=sys.stdin, nargs='?')
     parser.add_argument('outfile', nargs='?', type=argparse.FileType('w'), default=sys.stdout,
                         help='きれいなbibファイル名（出力ファイル名; default: stdout）')
     return parser.parse_args()
 
+def bibtex_cleaner(bibtext):
+    bib_database = bibtexparser.loads(bibtext)
+    cleaned_database = clean_entries(bib_database)
+    writer = BibTexWriter()
+    return writer.write(cleaned_database)
+
 if __name__ == '__main__':
     args = parse_args()
     bibtex_str = args.bibfile.read()
-    bib_database = bibtexparser.loads(bibtex_str)
-    cleaned_database = clean_entries(bib_database)
-    #print(bib_database.entries)
-    #print(cleaned_database.entries)
-    writer = BibTexWriter()
-    args.outfile.write(writer.write(cleaned_database))
+    args.outfile.write(bibtex_cleaner(bibtex_str))
