@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>BibTex Cleaner</title>
+</head>
+<body>
+<h1>BibTex Cleaner</h1>
+
+<h2>テキストから</h2>
+<form action="clean" method="post">
+  <p><label>BibTex:<br><textarea name="bibtex" rows="20" cols="80"></textarea></label>
+  <p><input type="submit" value="Submit">
+</form>
+
+<h2>ファイルから</h2>
+<form action="clean" method="post" enctype="multipart/form-data">
+  <p><input type="file" name="bibtex">
+  <p><input type="submit" value="Submit">
+</form>
+
+</body>
+</html>
