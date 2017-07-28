@@ -2,8 +2,6 @@ bibtexparser==0.6.2
 click==6.6
 decorator==4.0.10
 Flask==0.11.1
-ipython==4.2.1
-ipython-genutils==0.1.0
 itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
