@@ -2,15 +2,16 @@
 
 """
 BibTexのいらない項目を削除するスクリプト
-
-問題：
-IDが重複している恐れがある
 """
 
 import sys
+import re
+import unicodedata
+from collections import Counter
 import bibtexparser
 from bibtexparser.bibdatabase import BibDatabase
 from bibtexparser.bwriter import BibTexWriter
+
 
 # from Wikipedia (https://ja.wikipedia.org/wiki/BibTeX)
 nessesary = {
@@ -47,12 +48,7 @@ def make_id(entry):
     if 'author' not in entry or 'year' not in entry:
         return entry['ID']
 
-    idx = entry['author'].find(',')
-    if idx == -1:
-        name = entry['author']
-    else:
-        name = entry['author'][0:idx]
-
+    name = entry['author'].split('and')[0].split()[0].strip(',')
     # exclude spaces
     name = name.replace(' ', '').replace('.', '').replace('{', '').replace('}', '')
 
