@@ -86,10 +86,13 @@ def parse_args():
     return parser.parse_args()
 
 def bibtex_cleaner(bibtext):
-    bib_database = bibtexparser.loads(bibtext)
-    cleaned_database = clean_entries(bib_database)
-    writer = BibTexWriter()
-    return writer.write(cleaned_database)
+    try:
+        bib_database = bibtexparser.loads(bibtext)
+        cleaned_database = clean_entries(bib_database)
+        writer = BibTexWriter()
+        return writer.write(cleaned_database)
+    except Exception:
+        return 'Error. 入力形式はbibtexですか？\n'
 
 if __name__ == '__main__':
     args = parse_args()
