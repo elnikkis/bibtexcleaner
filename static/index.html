@@ -5,19 +5,41 @@
 <title>BibTex Cleaner</title>
 </head>
 <body>
+
 <h1>BibTex Cleaner</h1>
 
-<h2>テキストから</h2>
+<p>BibTexをきれいにします。</p>
+
+<ul>
+    <li>articleなら&quot;author&quot;, &quot;title&quot;, &quot;journal&quot;, &quot;year&quot;, &quot;volume&quot;, &quot;number&quot;, &quot;pages&quot;, &quot;key&quot;のフィールドだけを残して他は消します。</li>
+    <li>inproceedingsなら&quot;author&quot;, &quot;title&quot;, &quot;booktitle&quot;, &quot;year&quot;, &quot;pages&quot;, &quot;key&quot;のフィールドだけを残して他は消します。</li>
+    <li>その他はソースコードをご覧ください（他はどれが必要か利用回数が少なくてよくわかっていないので、少し余計なフィールドが付いて出てくると思います）。</li>
+    <li>titleの大文字・小文字は保持するようにできています。</li>
+    <li>引用に使うIDをauthor+year（例：Cheng2017）へ置き換えます。</li>
+    <li>日本人っぽい（ひらがな・カタカナ・漢字を含む）名前がauthorに出てきた場合、姓と名を入れ替えてあいだのカンマを抜きます。
+</ul>
+
+<p>source code: <a href="https://github.com/elnikkis/bibtexcleaner">https://github.com/elnikkis/bibtexcleaner</a> （プルリクください）</p>
+
+
+<h2>テキストから (from text)</h2>
+
 <form action="clean" method="post">
   <p><label>BibTex:<br><textarea name="bibtex" rows="20" cols="80"></textarea></label>
   <p><input type="submit" value="Submit">
 </form>
 
-<h2>ファイルから</h2>
+<h2>ファイルから (from file)</h2>
+
 <form action="clean" method="post" enctype="multipart/form-data">
   <p><input type="file" name="bibtex">
   <p><input type="submit" value="Submit">
 </form>
+
+<footer>
+    <p>作りが甘いので、バグを発見したら教えてください。</p>
+    <address>作成者：<a href="https://twitter.com/elnikkis">@elnikkis</a></address>
+</footer>
 
 </body>
 </html>
