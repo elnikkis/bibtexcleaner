@@ -59,16 +59,36 @@ def clean_entries(bib_database):
     for entry in bib_database.entries:
         needs = nessesary[entry['ENTRYTYPE']]
         e = {}
+        e['ID'] = entry['ID']
         e['ENTRYTYPE'] = entry['ENTRYTYPE']
-        e['ID'] = make_id(entry)
         for item in entry.keys():
             if item in needs:
                 e[item] = entry[item]
+
+        # 日本人？authorは,を消す
+        if 'author' in e and is_japanese(e['author']):
+            names = []
+            for fullname in entry['author'].split('and'):
+                name = fullname.split(',')
+                names.append('%s %s' % (name[1].strip(), name[0].strip()))
+            e['author'] = ' and '.join(names)
+
+        # titleを{}でかこむ (caseを保存するため)
+        if 'title' in entry:
+            e['title'] = '{' + e['title'] + '}'
+
+        e['ID'] = make_id(e)
         cleaned.append(e)
 
-    # titleを{}でかこむ (caseを保存するため)
-    for entry in cleaned:
-        entry['title'] = '{' + entry['title'] + '}'
+    # keyが同じentryをuniqueにする
+    counter = Counter([entry['ID'] for entry in cleaned])
+    for key, count in counter.items():
+        if count >= 2:
+            cnt = 0
+            for entry in cleaned:
+                if entry['ID'] == key:
+                    entry['ID'] = entry['ID'] + chr(ord('a') + cnt)
+                    cnt += 1
 
     # make new db
     db = BibDatabase()
