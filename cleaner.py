@@ -70,7 +70,7 @@ def clean_entries(bib_database):
             names = []
             for fullname in entry['author'].split('and'):
                 name = fullname.split(',')
-                names.append('%s %s' % (name[1].strip(), name[0].strip()))
+                names.append('%s %s' % (name[0].strip(), name[1].strip()))
             e['author'] = ' and '.join(names)
 
         # titleを{}でかこむ (caseを保存するため)
