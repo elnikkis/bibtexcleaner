@@ -55,18 +55,18 @@ def is_japanese(string):
 
 def make_id(entry):
     # authorが含まれていないエントリーはIDを変更しない
-    if 'author' not in entry or 'year' not in entry:
+    if 'author' not in entry or 'year' not in entry or not entry['author']:
         return entry['ID']
-
-    name = entry['author'].split('and')[0].split()[0].strip(',')
+    name = entry['author'].split('and')[0].strip().split()[0].strip(',')
     # exclude spaces
     name = name.replace(' ', '').replace('.', '').replace('{', '').replace('}', '')
 
     return name + entry['year']
 
-def clean_entries(bib_database):
+def clean_entries(bib_database, option):
     cleaned = []
     for entry in bib_database.entries:
+        # 必要なフィールドだけ取り出す
         needs = necessary[entry['ENTRYTYPE']]
         e = {}
         e['ID'] = entry['ID']
