@@ -33,6 +33,16 @@ necessary = {
     'unpublished': ['author', 'title', 'note', 'month', 'year', 'key']
 }
 
+def print_necessary_as_html():
+    fd = sys.stdout
+    print('<dl>', file=fd)
+    for key, value in necessary.items():
+        print('<dt>%s</dt>' % key, file=fd)
+        for field in value:
+            print('<dd>%s</dd>' % field, file=fd)
+    print('</dl>', file=fd)
+
+
 def is_japanese(string):
     for c in string:
         name = unicodedata.name(c)
