@@ -23,18 +23,18 @@
 <p>source code: <a href="https://github.com/elnikkis/bibtexcleaner">https://github.com/elnikkis/bibtexcleaner</a> （プルリクください）</p>
 
 
+<form action="clean" method="post" enctype="multipart/form-data">
+
 <h2>テキストから (from text)</h2>
 
-<form action="clean" method="post">
-  <p><label>BibTex:<br><textarea name="bibtex" rows="20" cols="80"></textarea></label>
-  <p><input type="submit" value="Submit">
-</form>
+  <p><label>BibTex:<br><textarea name="bibtext" rows="20" cols="80"></textarea></label>
+  <p><input type="submit" value="Submit" name="fromtext">
 
 <h2>ファイルから (from file)</h2>
 
-<form action="clean" method="post" enctype="multipart/form-data">
-  <p><input type="file" name="bibtex">
-  <p><input type="submit" value="Submit">
+  <p><input type="file" name="bibfile">
+  <p><input type="submit" value="Submit" name="fromfile">
+
 </form>
 
 <footer>

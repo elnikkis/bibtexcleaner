@@ -18,15 +18,20 @@ def index():
 @app.route('/clean', methods=['POST'])
 def clean():
     if request.method == 'POST':
-        if 'bibtex' in request.form:
-            bibtext = request.form['bibtex']
-        elif 'bibtex' in request.files:
-            bibtext = request.files['bibtex'].read().decode('utf-8')
-            if not bibtext:
-                abort(400)
+        if 'fromtext' in request.form and 'bibtext' in request.form:
+            bibtext = request.form['bibtext']
+        elif 'fromfile' in request.form and 'bibfile' in request.files:
+            bibtext = request.files['bibfile'].read().decode('utf-8')
         else:
             # error
             abort(400)
+
+        # エラー処理
+        if bibtext is None:
+            abort(400)
+        if bibtext == '':
+            return Response('Error. 入力が空です', mimetype='text/plain')
+
         cleaned = clean_bibtext(bibtext)
         return Response(cleaned, mimetype='text/plain')
 
