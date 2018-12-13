@@ -13,6 +13,10 @@ from bibtexparser.bibdatabase import BibDatabase
 from bibtexparser.bwriter import BibTexWriter
 
 
+class Setting():
+    items = ['savetitlecase', 'replaceid', 'jauthor', 'revjauthor']
+
+
 # from Wikipedia (https://ja.wikipedia.org/wiki/BibTeX)
 necessary = {
     #'article': ['author', 'title', 'journal', 'year', 'volume', 'number', 'pages', 'month', 'note', 'key'],
@@ -75,19 +79,23 @@ def clean_entries(bib_database, option):
             if item in needs:
                 e[item] = entry[item]
 
-        # 日本人？authorは,を消す
-        if 'author' in e and is_japanese(e['author']):
+        # 日本人ぽいauthorは姓名のあいだの,を消す
+        if option['jauthor'] and 'author' in e and is_japanese(e['author']):
             names = []
             for fullname in entry['author'].split('and'):
-                name = fullname.split(',')
-                names.append('%s %s' % (name[0].strip(), name[1].strip()))
+                name = [name.strip() for name in fullname.split(',')]
+                if option['revjauthor']:
+                    name = reversed(name)
+                names.append(' '.join(name))
             e['author'] = ' and '.join(names)
 
         # titleを{}でかこむ (caseを保存するため)
-        if 'title' in entry:
-            e['title'] = '{' + e['title'] + '}'
+        if option['savetitlecase'] and 'title' in entry:
+            e['title'] = '{%s}' % e['title']
 
-        e['ID'] = make_id(e)
+        # 引用keyをauthor+yearで置き換える
+        if option['replaceid']:
+            e['ID'] = make_id(e)
         cleaned.append(e)
 
     # keyが同じentryをuniqueにする
@@ -115,14 +123,14 @@ def parse_args():
                         help='きれいなbibファイル名（出力ファイル名; default: stdout）')
     return parser.parse_args()
 
-def bibtex_cleaner(bibtext):
+def bibtex_cleaner(bibtext, option):
     try:
         bib_database = bibtexparser.loads(bibtext)
-        cleaned_database = clean_entries(bib_database)
+        cleaned_database = clean_entries(bib_database, option)
         writer = BibTexWriter()
         return writer.write(cleaned_database)
     except Exception:
-        return 'Error. 入力形式はbibtexですか？\n'
+        return 'Error. 入力形式はbibtexですか？（または変換プログラムのバグの可能性があります）\n'
 
 if __name__ == '__main__':
     args = parse_args()

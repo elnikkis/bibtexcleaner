@@ -1,19 +1,14 @@
 # coding: utf-8
 
-from cleaner import bibtex_cleaner
-from flask import Flask, render_template, request, Response, abort
+from cleaner import bibtex_cleaner, Setting
+from flask import Flask, render_template, request, Response, abort, render_template
 
 app = Flask(__name__)
 
 
-def clean_bibtext(bibtext):
-    cleaned = bibtex_cleaner(bibtext)
-    return cleaned
-
-
 @app.route('/')
 def index():
-    return app.send_static_file('index.html')
+    return render_template('index.html')
 
 @app.route('/clean', methods=['POST'])
 def clean():
@@ -32,7 +27,15 @@ def clean():
         if bibtext == '':
             return Response('Error. 入力が空です', mimetype='text/plain')
 
-        cleaned = clean_bibtext(bibtext)
+        # 設定を取り出す
+        option = {}
+        for opt in Setting.items:
+            if request.form.get(opt) == 'on':
+                option[opt] = True
+            else:
+                option[opt] = False
+
+        cleaned = bibtex_cleaner(bibtext, option)
         return Response(cleaned, mimetype='text/plain')
 
 if __name__ == '__main__':

@@ -1,0 +1,27 @@
+#setting {
+    padding: 0;
+    list-style-type: none;
+}
+
+dl.fieldlist dt {
+    float: left;
+    clear: left;
+    width: 130px;
+    text-align: right;
+}
+
+dl.fieldlist dt::after {
+    content: ":";
+}
+
+dl.fieldlist dd {
+    float: left;
+    margin: 0;
+    padding-left: 0.5em;
+}
+
+dl.fieldlist::after {
+    content: "";
+    display: block;
+    clear: both;
+}

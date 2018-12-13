@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>BibTex Cleaner</title>
+<link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+
+<h1>BibTex Cleaner</h1>
+
+<p>BibTexをきれいにします。BibTexの各エントリから引用の際に不要なフィールドを取り除きます。</p>
+
+<form action="clean" method="post" enctype="multipart/form-data">
+
+  <h2>設定</h2>
+
+  <ul id="setting">
+    <li><label><input type="checkbox" name="savetitlecase" checked>titleの大文字・小文字を保持する。</label></li>
+    <li><label><input type="checkbox" name="replaceid">引用に使うIDをauthor+year（例：Cheng2017）へ置き換える。</label></li>
+    <li><label><input type="checkbox" name="jauthor" checked>日本人っぽい（ひらがな・カタカナ・漢字を含む）名前がauthorに出てきたとき、姓と名のあいだのカンマを抜く（BibTex的にFirst-Lastを入れ替える。<a href="http://shirotakeda.org/blog-ja/?p=2638">参考</a>）。</label></li>
+    <li><label><input type="checkbox" name="revjauthor">日本人っぽい（ひらがな・カタカナ・漢字を含む）名前がauthorに出てきたとき、姓と名を入れ替える（上のオプションと同時に選択すると、元々日本人名は姓名正しく入力されていたとみなす）。</label></li>
+  </ul>
+
+  <h2>テキストから (from text)</h2>
+
+  <p><label>BibTex:<br><textarea name="bibtext" rows="20" cols="80"></textarea></label>
+  <p><input type="submit" value="Submit" name="fromtext">
+
+  <h2>ファイルから (from file)</h2>
+
+  <p><input type="file" name="bibfile">
+  <p><input type="submit" value="Submit" name="fromfile">
+
+</form>
+
+<h2>残されるフィールドリスト</h2>
+
+<dl class="fieldlist">
+  <dt>article</dt>
+    <dd>author</dd>
+    <dd>title</dd>
+    <dd>journal</dd>
+    <dd>year</dd>
+    <dd>volume</dd>
+    <dd>number</dd>
+    <dd>pages</dd>
+    <dd>key</dd>
+  <dt>inproceedings</dt>
+    <dd>author</dd>
+    <dd>title</dd>
+    <dd>booktitle</dd>
+    <dd>year</dd>
+    <dd>pages</dd>
+    <dd>key</dd>
+<dt>phdthesis</dt>
+<dd>author</dd>
+<dd>title</dd>
+<dd>school</dd>
+<dd>year</dd>
+<dd>address</dd>
+<dd>month</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>masterthesis</dt>
+<dd>author</dd>
+<dd>title</dd>
+<dd>school</dd>
+<dd>year</dd>
+<dd>address</dd>
+<dd>month</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>proceedings</dt>
+<dd>title</dd>
+<dd>year</dd>
+<dd>editor</dd>
+<dd>publisher</dd>
+<dd>organization</dd>
+<dd>address</dd>
+<dd>month</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>conference</dt>
+<dd>author</dd>
+<dd>title</dd>
+<dd>booktitle</dd>
+<dd>year</dd>
+<dd>editor</dd>
+<dd>pages</dd>
+<dd>organization</dd>
+<dd>publisher</dd>
+<dd>address</dd>
+<dd>month</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>book</dt>
+<dd>author</dd>
+<dd>editor</dd>
+<dd>title</dd>
+<dd>publisher</dd>
+<dd>year</dd>
+<dd>volume</dd>
+<dd>series</dd>
+<dd>address</dd>
+<dd>edition</dd>
+<dd>month</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>booklet</dt>
+<dd>title</dd>
+<dd>author</dd>
+<dd>howpublished</dd>
+<dd>address</dd>
+<dd>month</dd>
+<dd>year</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>inbook</dt>
+<dd>author</dd>
+<dd>editor</dd>
+<dd>title</dd>
+<dd>chapter</dd>
+<dd>pages</dd>
+<dd>publisher</dd>
+<dd>year</dd>
+<dd>volume</dd>
+<dd>series</dd>
+<dd>address</dd>
+<dd>edition</dd>
+<dd>month</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>incollection</dt>
+<dd>author</dd>
+<dd>title</dd>
+<dd>booktitle</dd>
+<dd>year</dd>
+<dd>editor</dd>
+<dd>pages</dd>
+<dd>organization</dd>
+<dd>publisher</dd>
+<dd>address</dd>
+<dd>month</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>manual</dt>
+<dd>title</dd>
+<dd>author</dd>
+<dd>organization</dd>
+<dd>address</dd>
+<dd>edition</dd>
+<dd>month</dd>
+<dd>year</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>techreport</dt>
+<dd>author</dd>
+<dd>title</dd>
+<dd>institution</dd>
+<dd>year</dd>
+<dd>type</dd>
+<dd>number</dd>
+<dd>address</dd>
+<dd>month</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>misc</dt>
+<dd>author</dd>
+<dd>title</dd>
+<dd>howpublished</dd>
+<dd>month</dd>
+<dd>year</dd>
+<dd>note</dd>
+<dd>key</dd>
+<dt>unpublished</dt>
+<dd>author</dd>
+<dd>title</dd>
+<dd>note</dd>
+<dd>month</dd>
+<dd>year</dd>
+<dd>key</dd>
+</dl>
+
+
+<footer>
+  <p>作りが甘いので、バグを発見したら教えてください。</p>
+  <p>GitHub: <a href="https://github.com/elnikkis/bibtexcleaner">https://github.com/elnikkis/bibtexcleaner</a> </p>
+  <address>作成者：<a href="https://twitter.com/elnikkis">@elnikkis</a></address>
+</footer>
+
+</body>
+</html>
