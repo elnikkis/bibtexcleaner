@@ -14,7 +14,7 @@ from bibtexparser.bwriter import BibTexWriter
 
 
 # from Wikipedia (https://ja.wikipedia.org/wiki/BibTeX)
-nessesary = {
+necessary = {
     #'article': ['author', 'title', 'journal', 'year', 'volume', 'number', 'pages', 'month', 'note', 'key'],
     'article': ['author', 'title', 'journal', 'year', 'volume', 'number', 'pages', 'key'],
     'phdthesis': ['author', 'title', 'school', 'year', 'address', 'month', 'note', 'key'],
@@ -57,7 +57,7 @@ def make_id(entry):
 def clean_entries(bib_database):
     cleaned = []
     for entry in bib_database.entries:
-        needs = nessesary[entry['ENTRYTYPE']]
+        needs = necessary[entry['ENTRYTYPE']]
         e = {}
         e['ID'] = entry['ID']
         e['ENTRYTYPE'] = entry['ENTRYTYPE']
