@@ -23,7 +23,7 @@ necessary = {
     'article': ['author', 'title', 'journal', 'year', 'volume', 'number', 'pages', 'key'],
     'phdthesis': ['author', 'title', 'school', 'year', 'address', 'month', 'note', 'key'],
     'masterthesis': ['author', 'title', 'school', 'year', 'address', 'month', 'note', 'key'],
-    'proceedings': ['title', 'year', 'editor', 'publisher', 'organization', 'address', 'month', 'note', 'key'],
+    'proceedings': ['title', 'year', 'editor', 'publisher', 'organization', 'address', 'month', 'note', 'key', 'volume', 'number'],
 #    'inproceedings': ['author', 'title', 'booktitle', 'year', 'editor', 'pages', 'organization', 'publisher', 'address', 'month', 'note', 'key'],
     'inproceedings': ['author', 'title', 'booktitle', 'year', 'pages', 'key'],
     'conference': ['author', 'title', 'booktitle', 'year', 'editor', 'pages', 'organization', 'publisher', 'address', 'month', 'note', 'key'],
