@@ -11,157 +11,13 @@ import bibtexparser
 from bibtexparser.bibdatabase import BibDatabase
 from bibtexparser.bwriter import BibTexWriter
 
-
-class Setting:
-    items = ["savetitlecase", "replaceid", "jauthor", "revjauthor"]
+from bibtex_schema import required as required_fields
 
 
-# from Wikipedia (https://ja.wikipedia.org/wiki/BibTeX)
-necessary = {
-    "article": [
-        "author",
-        "title",
-        "journal",
-        "year",
-        "volume",
-        "number",
-        "pages",
-        "key",
-    ],
-    "phdthesis": [
-        "author",
-        "title",
-        "school",
-        "year",
-        "address",
-        "month",
-        "note",
-        "key",
-    ],
-    "masterthesis": [
-        "author",
-        "title",
-        "school",
-        "year",
-        "address",
-        "month",
-        "note",
-        "key",
-    ],
-    "proceedings": [
-        "title",
-        "year",
-        "editor",
-        "publisher",
-        "organization",
-        "address",
-        "month",
-        "note",
-        "key",
-        "volume",
-        "number",
-    ],
-    "inproceedings": ["author", "title", "booktitle", "year", "pages", "key"],
-    "conference": [
-        "author",
-        "title",
-        "booktitle",
-        "year",
-        "editor",
-        "pages",
-        "organization",
-        "publisher",
-        "address",
-        "month",
-        "note",
-        "key",
-    ],
-    "book": [
-        "author",
-        "editor",
-        "title",
-        "publisher",
-        "year",
-        "volume",
-        "series",
-        "address",
-        "edition",
-        "month",
-        "note",
-        "key",
-    ],
-    "booklet": [
-        "title",
-        "author",
-        "howpublished",
-        "address",
-        "month",
-        "year",
-        "note",
-        "key",
-    ],
-    "inbook": [
-        "author",
-        "editor",
-        "title",
-        "chapter",
-        "pages",
-        "publisher",
-        "year",
-        "volume",
-        "series",
-        "address",
-        "edition",
-        "month",
-        "note",
-        "key",
-    ],
-    "incollection": [
-        "author",
-        "title",
-        "booktitle",
-        "year",
-        "editor",
-        "pages",
-        "organization",
-        "publisher",
-        "address",
-        "month",
-        "note",
-        "key",
-    ],
-    "manual": [
-        "title",
-        "author",
-        "organization",
-        "address",
-        "edition",
-        "month",
-        "year",
-        "note",
-        "key",
-    ],
-    "techreport": [
-        "author",
-        "title",
-        "institution",
-        "year",
-        "type",
-        "number",
-        "address",
-        "month",
-        "note",
-        "key",
-    ],
-    "misc": ["author", "title", "howpublished", "month", "year", "note", "key"],
-    "unpublished": ["author", "title", "note", "month", "year", "key"],
-}
-
-
-def print_necessary_as_html():
+def print_required_fields_as_html():
     fd = sys.stdout
     print("<dl>", file=fd)
-    for key, value in necessary.items():
+    for key, value in required_fields.items():
         print("<dt>%s</dt>" % key, file=fd)
         for field in value:
             print("<dd>%s</dd>" % field, file=fd)
@@ -191,7 +47,7 @@ def clean_entries(bib_database, option):
     cleaned = []
     for entry in bib_database.entries:
         # 必要なフィールドだけ取り出す
-        needs = necessary[entry["ENTRYTYPE"]]
+        needs = required_fields[entry["ENTRYTYPE"]]
         e = {}
         e["ID"] = entry["ID"]
         e["ENTRYTYPE"] = entry["ENTRYTYPE"]

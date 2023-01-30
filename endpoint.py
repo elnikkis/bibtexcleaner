@@ -1,9 +1,13 @@
 # coding: utf-8
 
-from cleaner import bibtex_cleaner, Setting
+from cleaner import bibtex_cleaner
 from flask import Flask, render_template, request, Response, abort, render_template
 
 app = Flask(__name__)
+
+
+class Setting:
+    items = ["savetitlecase", "replaceid", "jauthor", "revjauthor"]
 
 
 @app.route("/")
