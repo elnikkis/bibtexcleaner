@@ -15,6 +15,7 @@ from bibtex_schema import required as required_fields
 
 
 def print_required_fields_as_html():
+    """Cleanerが残すフィールド定義辞書の中身を出力する"""
     fd = sys.stdout
     print("<dl>", file=fd)
     for key, value in required_fields.items():
@@ -25,6 +26,15 @@ def print_required_fields_as_html():
 
 
 def is_japanese(string):
+    """与えられた文字列が日本語かを判定する
+
+
+    Args:
+        string (str): 判定する文字列
+
+    Returns:
+        bool: 日本語範囲のUnicodeが1文字でも含まれていればTrueを返す。
+    """
     for c in string:
         name = unicodedata.name(c)
         if "CJK UNIFIED" in name or "HIRAGANA" in name or "KATAKANA" in name:
@@ -33,6 +43,14 @@ def is_japanese(string):
 
 
 def make_id(entry):
+    """entryからauthorとyearフィールドの中身を使って新たなIDを生成する
+
+    Args:
+        entry: bibtexエントリ
+
+    Returns:
+        str: authorとyearから生成されたID（例：Author2010）
+    """
     # authorが含まれていないエントリーはIDを変更しない
     if "author" not in entry or "year" not in entry or not entry["author"]:
         return entry["ID"]
@@ -44,6 +62,16 @@ def make_id(entry):
 
 
 def clean_entries(bib_database, option):
+    """
+    きれいにする
+
+    Args:
+        bib_database (BibDatabase):
+        option (dict):
+
+    Returns:
+        BibDatabase:
+    """
     cleaned = []
     for entry in bib_database.entries:
         # 必要なフィールドだけ取り出す
@@ -112,6 +140,15 @@ def parse_args():
 
 
 def bibtex_cleaner(bibtext, option):
+    """BibTeXを読み込み、きれいな形に整形して返す
+
+    Args:
+        bibtext (str): BibTexの文字列
+        option (dict): クリーナーの設定
+
+    Returns:
+        str: 整形されたBibTex
+    """
     try:
         bib_database = bibtexparser.loads(bibtext)
         cleaned_database = clean_entries(bib_database, option)
