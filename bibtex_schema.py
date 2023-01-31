@@ -138,5 +138,3 @@ required = {
     "misc": ["author", "title", "howpublished", "month", "year", "note", "key"],
     "unpublished": ["author", "title", "note", "month", "year", "key"],
 }
-
-
