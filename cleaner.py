@@ -118,6 +118,25 @@ def clean_entries(bib_database, option):
     return db
 
 
+def bibtex_cleaner(bibtext, option):
+    """BibTeXを読み込み、きれいな形に整形して返す
+
+    Args:
+        bibtext (str): BibTexの文字列
+        option (dict): クリーナーの設定
+
+    Returns:
+        str: 整形されたBibTex
+    """
+    try:
+        bib_database = bibtexparser.loads(bibtext)
+        cleaned_database = clean_entries(bib_database, option)
+        writer = BibTexWriter()
+        return writer.write(cleaned_database)
+    except Exception:
+        return "Error. 入力形式はbibtexですか？（または変換プログラムのバグの可能性があります）\n"
+
+
 def parse_args():
     import argparse
 
@@ -137,25 +156,6 @@ def parse_args():
         help="きれいなbibファイル名（出力ファイル名; default: stdout）",
     )
     return parser.parse_args()
-
-
-def bibtex_cleaner(bibtext, option):
-    """BibTeXを読み込み、きれいな形に整形して返す
-
-    Args:
-        bibtext (str): BibTexの文字列
-        option (dict): クリーナーの設定
-
-    Returns:
-        str: 整形されたBibTex
-    """
-    try:
-        bib_database = bibtexparser.loads(bibtext)
-        cleaned_database = clean_entries(bib_database, option)
-        writer = BibTexWriter()
-        return writer.write(cleaned_database)
-    except Exception:
-        return "Error. 入力形式はbibtexですか？（または変換プログラムのバグの可能性があります）\n"
 
 
 if __name__ == "__main__":
