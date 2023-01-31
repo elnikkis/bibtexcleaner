@@ -64,7 +64,9 @@ def _make_id(entry):
 
 
 def _wrap_title(entry):
-    if "title" in entry:
+    if "title" in entry and not (
+        entry["title"].startswith("{{") and entry["title"].endswith("}}")
+    ):
         entry["title"] = "{%s}" % entry["title"]
     return entry
 
