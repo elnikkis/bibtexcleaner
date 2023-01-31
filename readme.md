@@ -3,7 +3,6 @@
 余計な情報のついたあなたのBibTexをきれいにします。
 
 
-## deploy
+## 実行方法
 
-1. Install heroku CLI and login
-2. `heroku git:remote -a bibtexcleaner`
+`gunicorn endpoint:app`
