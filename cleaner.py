@@ -14,6 +14,10 @@ from bibtexparser.bwriter import BibTexWriter
 from bibtex_schema import required as required_fields
 
 
+class CleanerException(Exception):
+    pass
+
+
 def print_required_fields_as_html():
     """Cleanerが残すフィールド定義辞書の中身を出力する"""
     fd = sys.stdout
@@ -25,9 +29,8 @@ def print_required_fields_as_html():
     print("</dl>", file=fd)
 
 
-def is_japanese(string):
-    """与えられた文字列が日本語かを判定する
-
+def _is_japanese(string):
+    """文字列が日本語かを判定する
 
     Args:
         string (str): 判定する文字列
@@ -42,7 +45,7 @@ def is_japanese(string):
     return False
 
 
-def make_id(entry):
+def _make_id(entry):
     """entryからauthorとyearフィールドの中身を使って新たなIDを生成する
 
     Args:
@@ -57,8 +60,53 @@ def make_id(entry):
     name = entry["author"].split("and")[0].strip().split()[0].strip(",")
     # exclude spaces
     name = name.replace(" ", "").replace(".", "").replace("{", "").replace("}", "")
-
     return name + entry["year"]
+
+
+def _wrap_title(entry):
+    if "title" in entry:
+        entry["title"] = "{%s}" % entry["title"]
+    return entry
+
+
+def _treat_japanese_author(entry, reverse_author: bool):
+    if "author" in entry and _is_japanese(entry["author"]):
+        names = []
+        for fullname in entry["author"].split("and"):
+            name = [name.strip() for name in fullname.split(",")]
+            if reverse_author:
+                name = reversed(name)
+            names.append(" ".join(name))
+        entry["author"] = " and ".join(names)
+    return entry
+
+
+def clean_entry(entry, option):
+    # 必要なフィールドだけ取り出す
+    try:
+        needs = required_fields[entry["ENTRYTYPE"]]
+    except KeyError:
+        raise CleanerException(f"{entry['ENTRYTYPE']}")
+    e = {}
+    e["ID"] = entry["ID"]
+    e["ENTRYTYPE"] = entry["ENTRYTYPE"]
+    for item in entry.keys():
+        if item in needs:
+            e[item] = entry[item]
+
+    # 日本人ぽいauthorは姓名のあいだの,を消す
+    if option["jauthor"]:
+        e = _treat_japanese_author(e, reverse_author=option["revjauthor"])
+        pass
+
+    # titleを{}でかこむ (caseを保存するため)
+    if option["savetitlecase"]:
+        e = _wrap_title(e)
+
+    # 引用keyをauthor+yearで置き換える
+    if option["replaceid"]:
+        e["ID"] = _make_id(e)
+    return e
 
 
 def clean_entries(bib_database, option):
@@ -72,49 +120,24 @@ def clean_entries(bib_database, option):
     Returns:
         BibDatabase:
     """
-    cleaned = []
+    cleaned_entries = []
     for entry in bib_database.entries:
-        # 必要なフィールドだけ取り出す
-        needs = required_fields[entry["ENTRYTYPE"]]
-        e = {}
-        e["ID"] = entry["ID"]
-        e["ENTRYTYPE"] = entry["ENTRYTYPE"]
-        for item in entry.keys():
-            if item in needs:
-                e[item] = entry[item]
-
-        # 日本人ぽいauthorは姓名のあいだの,を消す
-        if option["jauthor"] and "author" in e and is_japanese(e["author"]):
-            names = []
-            for fullname in entry["author"].split("and"):
-                name = [name.strip() for name in fullname.split(",")]
-                if option["revjauthor"]:
-                    name = reversed(name)
-                names.append(" ".join(name))
-            e["author"] = " and ".join(names)
-
-        # titleを{}でかこむ (caseを保存するため)
-        if option["savetitlecase"] and "title" in entry:
-            e["title"] = "{%s}" % e["title"]
-
-        # 引用keyをauthor+yearで置き換える
-        if option["replaceid"]:
-            e["ID"] = make_id(e)
-        cleaned.append(e)
+        e = clean_entry(entry, option)
+        cleaned_entries.append(e)
 
     # keyが同じentryをuniqueにする
-    counter = Counter([entry["ID"] for entry in cleaned])
+    counter = Counter([entry["ID"] for entry in cleaned_entries])
     for key, count in counter.items():
         if count >= 2:
             cnt = 0
-            for entry in cleaned:
+            for entry in cleaned_entries:
                 if entry["ID"] == key:
                     entry["ID"] = entry["ID"] + chr(ord("a") + cnt)
                     cnt += 1
 
     # make new db
     db = BibDatabase()
-    db.entries = cleaned
+    db.entries = cleaned_entries
     return db
 
 
@@ -133,8 +156,8 @@ def bibtex_cleaner(bibtext, option):
         cleaned_database = clean_entries(bib_database, option)
         writer = BibTexWriter()
         return writer.write(cleaned_database)
-    except Exception:
-        return "Error. 入力形式はbibtexですか？（または変換プログラムのバグの可能性があります）\n"
+    except CleanerException as e:
+        raise
 
 
 def parse_args():

@@ -40,7 +40,14 @@ def clean():
             else:
                 option[opt] = False
 
-        cleaned = bibtex_cleaner(bibtext, option)
+        try:
+            cleaned = bibtex_cleaner(bibtext, option)
+        except CleanerException as e:
+            return Response(
+                "Error. 入力形式はbibtexですか？（または変換プログラムのバグの可能性があります）\n",
+                mimetype="text/plain",
+            )
+
         return Response(cleaned, mimetype="text/plain")
 
 
