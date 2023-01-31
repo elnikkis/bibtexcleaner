@@ -1,7 +1,7 @@
 # coding: utf-8
 
+from flask import Flask, render_template, request, Response, abort
 from cleaner import bibtex_cleaner
-from flask import Flask, render_template, request, Response, abort, render_template
 
 app = Flask(__name__)
 
