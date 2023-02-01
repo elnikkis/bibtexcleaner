@@ -39,7 +39,11 @@ def _is_japanese(string):
         bool: 日本語範囲のUnicodeが1文字でも含まれていればTrueを返す。
     """
     for c in string:
-        name = unicodedata.name(c)
+        try:
+            name = unicodedata.name(c)
+        except ValueError:
+            # control characterの可能性がある。無視する
+            return False
         if "CJK UNIFIED" in name or "HIRAGANA" in name or "KATAKANA" in name:
             return True
     return False
