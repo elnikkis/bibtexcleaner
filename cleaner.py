@@ -9,9 +9,18 @@ import unicodedata
 from collections import Counter
 import bibtexparser
 from bibtexparser.bibdatabase import BibDatabase
+from bibtexparser.bparser import BibTexParser
 from bibtexparser.bwriter import BibTexWriter
+from bibtexparser.customization import splitname
+import bibtexparser.customization as bcus
 
 from bibtex_schema import required as required_fields
+
+
+def parser_customizations(record):
+    record = bcus.author(record)
+    record = bcus.page_double_hyphen(record)
+    return record
 
 
 class CleanerException(Exception):
@@ -61,29 +70,77 @@ def _make_id(entry):
     # authorが含まれていないエントリーはIDを変更しない
     if "author" not in entry or "year" not in entry or not entry["author"]:
         return entry["ID"]
-    name = entry["author"].split("and")[0].strip().split()[0].strip(",")
+
+    first_author = entry["author"][0]
+    name_dict = splitname(first_author)
+    name = name_dict["last"][0]
+
     # exclude spaces
     name = name.replace(" ", "").replace(".", "").replace("{", "").replace("}", "")
     return name + entry["year"]
 
 
+def check_parentheses_matching(string, opening, closing):
+    """openingとclosingが対応しているか調べる
+
+    Args:
+        opening (str):
+        closing (str):
+
+    Returns:
+        bool: openingとclosingが対応していればTrueを返す
+    """
+    opening = set(opening)
+    closing = set(closing)
+
+    stack = []
+    for c in string:
+        if c in opening:
+            stack.append(c)
+        elif c in closing:
+            try:
+                stack.pop()
+            except IndexError:
+                # popする要素がない
+                return False
+
+    if len(stack) > 0:
+        # マッチしていない括弧が残っている
+        return False
+    else:
+        return True
+
+
 def _wrap_title(entry):
-    if "title" in entry and not (
-        entry["title"].startswith("{{") and entry["title"].endswith("}}")
-    ):
+    if "title" in entry:
+        title = entry["title"]
+        if (
+            title[0] == "{"
+            and title[-1] == "}"
+            and check_parentheses_matching(title[1:-1], "{", "}")
+        ):
+            # 先頭と末尾にマッチする括弧がすでに存在するのでなにもしない
+            return entry
         entry["title"] = "{%s}" % entry["title"]
     return entry
 
 
 def _treat_japanese_author(entry, reverse_author: bool):
-    if "author" in entry and _is_japanese(entry["author"]):
+
+    if "author" in entry:
         names = []
-        for fullname in entry["author"].split("and"):
-            name = [name.strip() for name in fullname.split(",")]
-            if reverse_author:
-                name = reversed(name)
-            names.append(" ".join(name))
-        entry["author"] = " and ".join(names)
+        for fullname in entry["author"]:
+            name_dict = splitname(fullname, strict_mode=False)
+            if name_dict["von"] or name_dict["jr"] or not _is_japanese(fullname):
+                # 日本人の名前にはvonやjrはないはず
+                # 日本人の名前以外はそのまま
+                name = fullname
+            elif reverse_author:
+                name = name_dict["first"] + " " + name_dict["last"]
+            else:
+                name = name_dict["last"] + " " + name_dict["first"]
+            names.append(name)
+        entry["author"] = names
     return entry
 
 
@@ -112,6 +169,9 @@ def clean_entry(entry, option):
     # 引用keyをauthor+yearで置き換える
     if option["replaceid"]:
         e["ID"] = _make_id(e)
+
+    # authorをlistからstrに戻す
+    e["author"] = " and ".join(e["author"])
     return e
 
 
@@ -158,7 +218,8 @@ def bibtex_cleaner(bibtext, option):
         str: 整形されたBibTex
     """
     try:
-        bib_database = bibtexparser.loads(bibtext)
+        parser = BibTexParser(customization=parser_customizations)
+        bib_database = bibtexparser.loads(bibtext, parser=parser)
         cleaned_database = clean_entries(bib_database, option)
         writer = BibTexWriter()
         return writer.write(cleaned_database)
