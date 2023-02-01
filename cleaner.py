@@ -222,6 +222,7 @@ def bibtex_cleaner(bibtext, option):
         bib_database = bibtexparser.loads(bibtext, parser=parser)
         cleaned_database = clean_entries(bib_database, option)
         writer = BibTexWriter()
+        writer.indent = '  '
         return writer.write(cleaned_database)
     except CleanerException as e:
         raise
