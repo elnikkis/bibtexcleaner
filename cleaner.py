@@ -92,7 +92,7 @@ def clean_entry(entry, option):
     try:
         needs = required_fields[entry["ENTRYTYPE"]]
     except KeyError:
-        raise CleanerException(f"{entry['ENTRYTYPE']}")
+        raise CleanerException(f"Unknown entry type: {entry['ENTRYTYPE']}")
     e = {}
     e["ID"] = entry["ID"]
     e["ENTRYTYPE"] = entry["ENTRYTYPE"]
