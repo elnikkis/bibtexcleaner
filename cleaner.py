@@ -28,11 +28,14 @@ def page_double_hyphen(record):
     """
     if "pages" in record:
         # double-hyphen, hyphen, non-breaking hyphen, en dash, em dash, hyphen-minus, minus sign
-        separators = [u'--', u'‐', u'‑', u'–', u'—', u'-', u'−']
+        separators = ["--", "‐", "‑", "–", "—", "-", "−"]
         for separator in separators:
             if separator in record["pages"]:
-                p = [i.strip().strip(separator) for i in record["pages"].split(separator, 1)]
-                record["pages"] = p[0] + '--' + p[-1]
+                p = [
+                    i.strip().strip(separator)
+                    for i in record["pages"].split(separator, 1)
+                ]
+                record["pages"] = p[0] + "--" + p[-1]
                 return record
     return record
 
@@ -156,9 +159,9 @@ def _treat_japanese_author(entry, reverse_author: bool):
                 # 日本人の名前以外はそのまま
                 name = fullname
             elif reverse_author:
-                name = ' '.join(name_dict["first"]) + " " + ' '.join(name_dict["last"])
+                name = " ".join(name_dict["first"]) + " " + " ".join(name_dict["last"])
             else:
-                name = ' '.join(name_dict["last"]) + " " + ' '.join(name_dict["first"])
+                name = " ".join(name_dict["last"]) + " " + " ".join(name_dict["first"])
             names.append(name)
         entry["author"] = names
     return entry
@@ -242,7 +245,7 @@ def bibtex_cleaner(bibtext, option):
         bib_database = bibtexparser.loads(bibtext, parser=parser)
         cleaned_database = clean_entries(bib_database, option)
         writer = BibTexWriter()
-        writer.indent = '  '
+        writer.indent = "  "
         return writer.write(cleaned_database)
     except CleanerException as e:
         raise
