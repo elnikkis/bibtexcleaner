@@ -17,9 +17,29 @@ import bibtexparser.customization as bcus
 from bibtex_schema import required as required_fields
 
 
+def page_double_hyphen(record):
+    """
+    Separate pages by a double hyphen (--).
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
+
+    """
+    if "pages" in record:
+        # double-hyphen, hyphen, non-breaking hyphen, en dash, em dash, hyphen-minus, minus sign
+        separators = [u'--', u'‐', u'‑', u'–', u'—', u'-', u'−']
+        for separator in separators:
+            if separator in record["pages"]:
+                p = [i.strip().strip(separator) for i in record["pages"].split(separator, 1)]
+                record["pages"] = p[0] + '--' + p[-1]
+                return record
+    return record
+
+
 def parser_customizations(record):
     record = bcus.author(record)
-    record = bcus.page_double_hyphen(record)
+    record = page_double_hyphen(record)
     return record
 
 
