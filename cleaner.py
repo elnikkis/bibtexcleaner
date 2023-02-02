@@ -40,8 +40,17 @@ def page_double_hyphen(record):
     return record
 
 
+def split_author(record):
+    if "author" in record and record["author"]:
+        record["author"] = [
+            fullname.strip() for fullname in record["author"].split(" and ")
+        ]
+    return record
+
+
 def parser_customizations(record):
-    record = bcus.author(record)
+    record = bcus.type(record)
+    record = split_author(record)
     record = page_double_hyphen(record)
     return record
 
@@ -96,7 +105,23 @@ def _make_id(entry):
 
     first_author = entry["author"][0]
     name_dict = splitname(first_author)
-    name = name_dict["last"][0]
+
+    # firstもlastも空ならなにもしない
+    if not name_dict["first"] and not name_dict["last"]:
+        return entry["ID"]
+
+    if not name_dict["first"] or not name_dict["last"]:
+        # firstかlastのどちらかが空ならある方を使う
+        if name_dict["last"]:
+            name = "".join(name_dict["last"])
+        else:
+            name = "".join(name_dict["first"])
+    elif _is_japanese(first_author):
+        # 日本人名は入れ替え済みなのでfirst
+        name = "".join(name_dict["first"])
+    else:
+        # 基本的にはlast
+        name = "".join(name_dict["last"])
 
     # exclude spaces
     name = name.replace(" ", "").replace(".", "").replace("{", "").replace("}", "")
@@ -149,19 +174,20 @@ def _wrap_title(entry):
 
 
 def _treat_japanese_author(entry, reverse_author: bool):
-
     if "author" in entry:
         names = []
         for fullname in entry["author"]:
-            name_dict = splitname(fullname, strict_mode=False)
-            if name_dict["von"] or name_dict["jr"] or not _is_japanese(fullname):
-                # 日本人の名前にはvonやjrはないはず
+            if _is_japanese(fullname) and "," in fullname:
+                last, first = fullname.split(",", 1)
+                first = first.strip()
+                last = last.strip()
+                if reverse_author:
+                    name = f"{first} {last}"
+                else:
+                    name = f"{last} {first}"
+            else:
                 # 日本人の名前以外はそのまま
                 name = fullname
-            elif reverse_author:
-                name = " ".join(name_dict["first"]) + " " + " ".join(name_dict["last"])
-            else:
-                name = " ".join(name_dict["last"]) + " " + " ".join(name_dict["first"])
             names.append(name)
         entry["author"] = names
     return entry
