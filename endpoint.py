@@ -51,6 +51,10 @@ def clean():
         return Response(cleaned, mimetype="text/plain")
 
 
+@app.route("/healthz")
+def health_check():
+    return Response('fine', mimetype="text/plain")
+
 if __name__ == "__main__":
     app.debug = True
     app.run()
