@@ -48,8 +48,23 @@ def split_author(record):
     return record
 
 
+def _remove_cc_from_string(string):
+    return ''.join(c for c in string if not unicodedata.category(c) == 'Cc')
+
+
+def remove_contril_characters(record):
+    target_fields = ['author', 'title', 'journal', 'booktitle']
+    for key in target_fields:
+        if key in record and isinstance(record[key], str):
+            record[key] = _remove_cc_from_string(record[key])
+        if key in record and isinstance(record[key], list):
+            record[key] = [_remove_cc_from_string(item) for item in record[key]]
+    return record
+
+
 def parser_customizations(record):
     record = bcus.type(record)
+    record = remove_contril_characters(record)
     record = split_author(record)
     record = page_double_hyphen(record)
     return record
