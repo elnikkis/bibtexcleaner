@@ -21,10 +21,10 @@ def page_double_hyphen(record):
     """
     Separate pages by a double hyphen (--).
 
-    :param record: the record.
-    :type record: dict
-    :returns: dict -- the modified record.
-
+    Args:
+        record (dict): the record
+    Returns:
+        dict: the modified record
     """
     if "pages" in record:
         # double-hyphen, hyphen, non-breaking hyphen, en dash, em dash, hyphen-minus, minus sign
