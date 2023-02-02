@@ -136,9 +136,9 @@ def _treat_japanese_author(entry, reverse_author: bool):
                 # 日本人の名前以外はそのまま
                 name = fullname
             elif reverse_author:
-                name = name_dict["first"] + " " + name_dict["last"]
+                name = ' '.join(name_dict["first"]) + " " + ' '.join(name_dict["last"])
             else:
-                name = name_dict["last"] + " " + name_dict["first"]
+                name = ' '.join(name_dict["last"]) + " " + ' '.join(name_dict["first"])
             names.append(name)
         entry["author"] = names
     return entry
