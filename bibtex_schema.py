@@ -60,16 +60,12 @@ required = {
     ],
     "book": [
         "author",
-        "editor",
         "title",
         "publisher",
         "year",
         "volume",
         "series",
-        "address",
         "edition",
-        "month",
-        "note",
         "key",
     ],
     "booklet": [
