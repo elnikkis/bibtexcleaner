@@ -235,7 +235,8 @@ def clean_entry(entry, option):
         e["ID"] = _make_id(e)
 
     # authorをlistからstrに戻す
-    e["author"] = " and ".join(e["author"])
+    if "author" in e:
+        e["author"] = " and ".join(e["author"])
     return e
 
 
