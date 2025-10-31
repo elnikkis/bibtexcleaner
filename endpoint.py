@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 
 class Setting:
-    items = ["savetitlecase", "replaceid", "jauthor", "revjauthor"]
+    items = ["savetitlecase", "replaceid", "jauthor", "revjauthor", "save_doi"]
 
 
 @app.route("/")

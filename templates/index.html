@@ -2,14 +2,14 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>BibTex Cleaner</title>
+<title>BibTeX Cleaner</title>
 <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
 
-<h1>BibTex Cleaner</h1>
+<h1>BibTeX Cleaner</h1>
 
-<p>BibTexをきれいにします。BibTexの各エントリから引用の際に不要なフィールドを取り除きます。</p>
+<p>BibTeXをきれいにします。BibTeXの各エントリから引用の際に不要なフィールドを取り除きます。</p>
 
 <form action="clean" method="post" enctype="multipart/form-data">
 
@@ -20,6 +20,7 @@
     <li><label><input type="checkbox" name="replaceid" checked>引用に使うIDをauthor+year（例：Cheng2017）へ置き換える。</label></li>
     <li><label><input type="checkbox" name="jauthor" checked>日本人っぽい（ひらがな・カタカナ・漢字を含む）名前がauthorに出てきたとき、姓と名のあいだのカンマを抜く（BibTex的にFirst-Lastを入れ替える）。</label></li>
     <li><label><input type="checkbox" name="revjauthor">上のオプションを実行するとき、さらに姓と名を入れ替える（つまり元々日本人の姓名がBibTex的に正しく入力されていたとみなす）。</label></li>
+    <li><label><input type="checkbox" name="save_doi">DOIフィールドを保持する。</label></li>
   </ul>
 
   <h2>テキストから (from text)</h2>
@@ -35,6 +36,8 @@
 </form>
 
 <h2>残されるフィールドリスト</h2>
+
+以下のフィールドの他、「DOIフィールドを保持する」オプションをONにした場合、doiフィールドも残ります。
 
 <dl class="fieldlist">
   <dt>article</dt>

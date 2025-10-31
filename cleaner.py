@@ -221,6 +221,10 @@ def clean_entry(entry, option):
         if item in needs:
             e[item] = entry[item]
 
+    # オプションでDOIフィールドを保持
+    if option.get("save_doi") and "doi" in entry:
+        e["doi"] = entry["doi"]
+
     # 日本人ぽいauthorは姓名のあいだの,を消す
     if option["jauthor"]:
         e = _treat_japanese_author(e, reverse_author=option["revjauthor"])
