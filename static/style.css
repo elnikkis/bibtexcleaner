@@ -25,3 +25,19 @@ dl.fieldlist::after {
     display: block;
     clear: both;
 }
+
+#result-textarea {
+    width: 100%;
+    max-width: 800px;
+    font-family: monospace;
+}
+
+#copy-status {
+    margin-left: 10px;
+    color: green;
+}
+
+.hidden {
+    display: none;
+}
+

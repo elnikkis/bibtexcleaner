@@ -23,17 +23,26 @@
     <li><label><input type="checkbox" name="save_doi">DOIフィールドを保持する。</label></li>
   </ul>
 
-  <h2>テキストから (from text)</h2>
+  <h2>入力：テキストから (from text)</h2>
 
   <p><label>BibTex:<br><textarea name="bibtext" rows="20" cols="80"></textarea></label>
   <p><input type="submit" value="Submit" name="fromtext">
 
-  <h2>ファイルから (from file)</h2>
+  <h2>入力：ファイルから (from file)</h2>
 
   <p><input type="file" name="bibfile">
   <p><input type="submit" value="Submit" name="fromfile">
 
 </form>
+
+<div>
+  <h2>出力：変換結果</h2>
+  <textarea rows="20" cols="80" id="result-textarea"></textarea>
+  <div>
+    <button type="button" id="copy-button">結果をコピー</button>
+    <span id="copy-status" class="hidden">コピーしました！</span>
+  </div>
+</div>
 
 <h2>残されるフィールドリスト</h2>
 
@@ -193,6 +202,71 @@
   <p>GitHub: <a href="https://github.com/elnikkis/bibtexcleaner">https://github.com/elnikkis/bibtexcleaner</a> </p>
   <address>作成者：<a href="https://twitter.com/elnikkis">@elnikkis</a></address>
 </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const resultTextarea = document.getElementById('result-textarea');
+  const copyButton = document.getElementById('copy-button');
+  const copyStatus = document.getElementById('copy-status');
+
+  // フォーム送信の処理
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // ローディング状態を表示
+    //resultContainer.style.display = 'block';
+    resultTextarea.value = '処理中...';
+    //copyButton.disabled = true;
+
+    try {
+      // FormDataを作成
+      const formData = new FormData(form);
+
+      // どのsubmitボタンが押されたかを追加
+      if (e.submitter && e.submitter.name) {
+        formData.append(e.submitter.name, e.submitter.value);
+      }
+
+      // Fetch APIでPOST
+      const response = await fetch('/clean', {
+        method: 'POST',
+        body: formData
+      });
+
+      // レスポンスをテキストとして取得
+      const result = await response.text();
+
+      // 結果を表示
+      resultTextarea.value = result;
+      //copyButton.disabled = false;
+
+      // エラーの場合は赤文字で表示
+      if (result.startsWith('Error.')) {
+        resultTextarea.style.color = 'red';
+      } else {
+        resultTextarea.style.color = '';
+      }
+
+    } catch (error) {
+      resultTextarea.value = 'Error. 通信エラーが発生しました。';
+      resultTextarea.style.color = 'red';
+      copyButton.disabled = false;
+    }
+  });
+
+  // コピーボタンの処理
+  copyButton.addEventListener('click', function() {
+    resultTextarea.select();
+    navigator.clipboard.writeText(resultTextarea.value).then(function() {
+      copyStatus.style.display = 'inline';
+      setTimeout(function() {
+        copyStatus.style.display = 'none';
+      }, 2000);
+    });
+  });
+});
+</script>
 
 </body>
 </html>
