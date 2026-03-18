@@ -1,0 +1,10 @@
+[project]
+name = "bibtexcleaner"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "bibtexparser>=1.4.4",
+    "flask>=0.12.3",
+    "gunicorn>=25.1.0",
+]
