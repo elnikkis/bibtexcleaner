@@ -1,7 +1,7 @@
 [project]
 name = "bibtexcleaner"
 version = "0.1.0"
-description = "Add your description here"
+description = "A web app and CLI tool that strips unnecessary fields from BibTeX entries and normalizes formatting"
 requires-python = ">=3.13"
 dependencies = [
     "bibtexparser>=1.4.4",
