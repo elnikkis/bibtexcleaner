@@ -2,204 +2,226 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BibTeX Cleaner</title>
 <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
 
-<h1>BibTeX Cleaner</h1>
+<header>
+  <h1>BibTeX Cleaner</h1>
+  <p>BibTeXの各エントリから引用の際に不要なフィールドを取り除きます。</p>
+</header>
 
-<p>BibTeXをきれいにします。BibTeXの各エントリから引用の際に不要なフィールドを取り除きます。</p>
+<main>
+  <form action="clean" method="post" enctype="multipart/form-data">
+    <div class="workspace">
 
-<form action="clean" method="post" enctype="multipart/form-data">
+      <!-- 入力パネル -->
+      <div class="panel input-panel">
+        <p class="panel-title">設定</p>
 
-  <h2>設定</h2>
+        <div class="settings-grid">
+          <label><input type="checkbox" name="savetitlecase">titleの大文字・小文字を保持する</label>
+          <label><input type="checkbox" name="replaceid" checked>IDをauthor+year形式に置換（例：Cheng2017）</label>
+          <label><input type="checkbox" name="jauthor" checked>日本人著者名のカンマを除去する</label>
+          <label><input type="checkbox" name="revjauthor">日本人著者の姓と名を入れ替える</label>
+          <label><input type="checkbox" name="save_doi">DOIフィールドを保持する</label>
+        </div>
 
-  <ul id="setting">
-    <li><label><input type="checkbox" name="savetitlecase">titleの大文字・小文字を保持する。</label></li>
-    <li><label><input type="checkbox" name="replaceid" checked>引用に使うIDをauthor+year（例：Cheng2017）へ置き換える。</label></li>
-    <li><label><input type="checkbox" name="jauthor" checked>日本人っぽい（ひらがな・カタカナ・漢字を含む）名前がauthorに出てきたとき、姓と名のあいだのカンマを抜く（BibTex的にFirst-Lastを入れ替える）。</label></li>
-    <li><label><input type="checkbox" name="revjauthor">上のオプションを実行するとき、さらに姓と名を入れ替える（つまり元々日本人の姓名がBibTex的に正しく入力されていたとみなす）。</label></li>
-    <li><label><input type="checkbox" name="save_doi">DOIフィールドを保持する。</label></li>
-  </ul>
+        <!-- タブ -->
+        <div class="tab-bar">
+          <button type="button" class="tab-btn active" data-tab="text-tab">テキスト入力</button>
+          <button type="button" class="tab-btn" data-tab="file-tab">ファイル入力</button>
+        </div>
 
-  <h2>入力：テキストから (from text)</h2>
+        <div class="tab-content active" id="text-tab">
+          <textarea name="bibtext" placeholder="BibTeXをここに貼り付けてください…"></textarea>
+          <input type="submit" value="変換する" name="fromtext" class="submit-btn">
+        </div>
 
-  <p><label>BibTex:<br><textarea name="bibtext" rows="20" cols="80"></textarea></label>
-  <p><input type="submit" value="Submit" name="fromtext">
+        <div class="tab-content" id="file-tab">
+          <div class="file-input-area">
+            <input type="file" name="bibfile" accept=".bib">
+          </div>
+          <input type="submit" value="変換する" name="fromfile" class="submit-btn">
+        </div>
+      </div>
 
-  <h2>入力：ファイルから (from file)</h2>
+      <!-- 出力パネル -->
+      <div class="panel output-panel">
+        <div class="output-header">
+          <span>変換結果</span>
+          <div class="copy-area">
+            <button type="button" id="copy-button">コピー</button>
+            <span id="copy-status" class="hidden">コピーしました！</span>
+          </div>
+        </div>
+        <textarea id="result-textarea" readonly placeholder="変換結果がここに表示されます…"></textarea>
+      </div>
 
-  <p><input type="file" name="bibfile">
-  <p><input type="submit" value="Submit" name="fromfile">
+    </div>
+  </form>
 
-</form>
-
-<div>
-  <h2>出力：変換結果</h2>
-  <textarea rows="20" cols="80" id="result-textarea"></textarea>
-  <div>
-    <button type="button" id="copy-button">結果をコピー</button>
-    <span id="copy-status" class="hidden">コピーしました！</span>
-  </div>
-</div>
-
-<h2>残されるフィールドリスト</h2>
-
-以下のフィールドの他、「DOIフィールドを保持する」オプションをONにした場合、doiフィールドも残ります。
-
-<dl class="fieldlist">
-  <dt>article</dt>
-    <dd>author</dd>
-    <dd>title</dd>
-    <dd>journal</dd>
-    <dd>year</dd>
-    <dd>volume</dd>
-    <dd>number</dd>
-    <dd>pages</dd>
-    <dd>key</dd>
-  <dt>inproceedings</dt>
-    <dd>author</dd>
-    <dd>title</dd>
-    <dd>booktitle</dd>
-    <dd>year</dd>
-    <dd>pages</dd>
-    <dd>key</dd>
-<dt>phdthesis</dt>
-<dd>author</dd>
-<dd>title</dd>
-<dd>school</dd>
-<dd>year</dd>
-<dd>address</dd>
-<dd>month</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dt>masterthesis</dt>
-<dd>author</dd>
-<dd>title</dd>
-<dd>school</dd>
-<dd>year</dd>
-<dd>address</dd>
-<dd>month</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dt>proceedings</dt>
-<dd>title</dd>
-<dd>year</dd>
-<dd>editor</dd>
-<dd>publisher</dd>
-<dd>organization</dd>
-<dd>address</dd>
-<dd>month</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dd>volume</dd>
-<dd>number</dd>
-<dt>conference</dt>
-<dd>author</dd>
-<dd>title</dd>
-<dd>booktitle</dd>
-<dd>year</dd>
-<dd>editor</dd>
-<dd>pages</dd>
-<dd>organization</dd>
-<dd>publisher</dd>
-<dd>address</dd>
-<dd>month</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dt>book</dt>
-<dd>author</dd>
-<dd>editor</dd>
-<dd>title</dd>
-<dd>publisher</dd>
-<dd>year</dd>
-<dd>volume</dd>
-<dd>series</dd>
-<dd>address</dd>
-<dd>edition</dd>
-<dd>month</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dt>booklet</dt>
-<dd>title</dd>
-<dd>author</dd>
-<dd>howpublished</dd>
-<dd>address</dd>
-<dd>month</dd>
-<dd>year</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dt>inbook</dt>
-<dd>author</dd>
-<dd>editor</dd>
-<dd>title</dd>
-<dd>chapter</dd>
-<dd>pages</dd>
-<dd>publisher</dd>
-<dd>year</dd>
-<dd>volume</dd>
-<dd>series</dd>
-<dd>address</dd>
-<dd>edition</dd>
-<dd>month</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dt>incollection</dt>
-<dd>author</dd>
-<dd>title</dd>
-<dd>booktitle</dd>
-<dd>year</dd>
-<dd>editor</dd>
-<dd>pages</dd>
-<dd>organization</dd>
-<dd>publisher</dd>
-<dd>address</dd>
-<dd>month</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dt>manual</dt>
-<dd>title</dd>
-<dd>author</dd>
-<dd>organization</dd>
-<dd>address</dd>
-<dd>edition</dd>
-<dd>month</dd>
-<dd>year</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dt>techreport</dt>
-<dd>author</dd>
-<dd>title</dd>
-<dd>institution</dd>
-<dd>year</dd>
-<dd>type</dd>
-<dd>number</dd>
-<dd>address</dd>
-<dd>month</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dt>misc</dt>
-<dd>author</dd>
-<dd>title</dd>
-<dd>howpublished</dd>
-<dd>month</dd>
-<dd>year</dd>
-<dd>note</dd>
-<dd>key</dd>
-<dt>unpublished</dt>
-<dd>author</dd>
-<dd>title</dd>
-<dd>note</dd>
-<dd>month</dd>
-<dd>year</dd>
-<dd>key</dd>
-</dl>
-
+  <!-- フィールドリスト（折りたたみ） -->
+  <details class="field-reference">
+    <summary>残されるフィールドリスト</summary>
+    <div class="field-reference-body">
+      <p>以下のフィールドの他、「DOIフィールドを保持する」オプションをONにした場合、doiフィールドも残ります。</p>
+      <dl class="fieldlist">
+        <dt>article</dt>
+          <dd>author</dd>
+          <dd>title</dd>
+          <dd>journal</dd>
+          <dd>year</dd>
+          <dd>volume</dd>
+          <dd>number</dd>
+          <dd>pages</dd>
+          <dd>key</dd>
+        <dt>inproceedings</dt>
+          <dd>author</dd>
+          <dd>title</dd>
+          <dd>booktitle</dd>
+          <dd>year</dd>
+          <dd>pages</dd>
+          <dd>key</dd>
+        <dt>phdthesis</dt>
+          <dd>author</dd>
+          <dd>title</dd>
+          <dd>school</dd>
+          <dd>year</dd>
+          <dd>address</dd>
+          <dd>month</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+        <dt>masterthesis</dt>
+          <dd>author</dd>
+          <dd>title</dd>
+          <dd>school</dd>
+          <dd>year</dd>
+          <dd>address</dd>
+          <dd>month</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+        <dt>proceedings</dt>
+          <dd>title</dd>
+          <dd>year</dd>
+          <dd>editor</dd>
+          <dd>publisher</dd>
+          <dd>organization</dd>
+          <dd>address</dd>
+          <dd>month</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+          <dd>volume</dd>
+          <dd>number</dd>
+        <dt>conference</dt>
+          <dd>author</dd>
+          <dd>title</dd>
+          <dd>booktitle</dd>
+          <dd>year</dd>
+          <dd>editor</dd>
+          <dd>pages</dd>
+          <dd>organization</dd>
+          <dd>publisher</dd>
+          <dd>address</dd>
+          <dd>month</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+        <dt>book</dt>
+          <dd>author</dd>
+          <dd>editor</dd>
+          <dd>title</dd>
+          <dd>publisher</dd>
+          <dd>year</dd>
+          <dd>volume</dd>
+          <dd>series</dd>
+          <dd>address</dd>
+          <dd>edition</dd>
+          <dd>month</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+        <dt>booklet</dt>
+          <dd>title</dd>
+          <dd>author</dd>
+          <dd>howpublished</dd>
+          <dd>address</dd>
+          <dd>month</dd>
+          <dd>year</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+        <dt>inbook</dt>
+          <dd>author</dd>
+          <dd>editor</dd>
+          <dd>title</dd>
+          <dd>chapter</dd>
+          <dd>pages</dd>
+          <dd>publisher</dd>
+          <dd>year</dd>
+          <dd>volume</dd>
+          <dd>series</dd>
+          <dd>address</dd>
+          <dd>edition</dd>
+          <dd>month</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+        <dt>incollection</dt>
+          <dd>author</dd>
+          <dd>title</dd>
+          <dd>booktitle</dd>
+          <dd>year</dd>
+          <dd>editor</dd>
+          <dd>pages</dd>
+          <dd>organization</dd>
+          <dd>publisher</dd>
+          <dd>address</dd>
+          <dd>month</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+        <dt>manual</dt>
+          <dd>title</dd>
+          <dd>author</dd>
+          <dd>organization</dd>
+          <dd>address</dd>
+          <dd>edition</dd>
+          <dd>month</dd>
+          <dd>year</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+        <dt>techreport</dt>
+          <dd>author</dd>
+          <dd>title</dd>
+          <dd>institution</dd>
+          <dd>year</dd>
+          <dd>type</dd>
+          <dd>number</dd>
+          <dd>address</dd>
+          <dd>month</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+        <dt>misc</dt>
+          <dd>author</dd>
+          <dd>title</dd>
+          <dd>howpublished</dd>
+          <dd>month</dd>
+          <dd>year</dd>
+          <dd>note</dd>
+          <dd>key</dd>
+        <dt>unpublished</dt>
+          <dd>author</dd>
+          <dd>title</dd>
+          <dd>note</dd>
+          <dd>month</dd>
+          <dd>year</dd>
+          <dd>key</dd>
+      </dl>
+    </div>
+  </details>
+</main>
 
 <footer>
   <p>作りが甘いので、バグを発見したら教えてください。</p>
-  <p>GitHub: <a href="https://github.com/elnikkis/bibtexcleaner">https://github.com/elnikkis/bibtexcleaner</a> </p>
+  <p>GitHub: <a href="https://github.com/elnikkis/bibtexcleaner">https://github.com/elnikkis/bibtexcleaner</a></p>
   <address>作成者：<a href="https://twitter.com/elnikkis">@elnikkis</a></address>
 </footer>
 
@@ -210,59 +232,63 @@ document.addEventListener('DOMContentLoaded', function() {
   const copyButton = document.getElementById('copy-button');
   const copyStatus = document.getElementById('copy-status');
 
-  // フォーム送信の処理
+  // タブ切り替え
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // フォーム送信
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    // ローディング状態を表示
-    //resultContainer.style.display = 'block';
+    const submitBtn = e.submitter;
+    if (submitBtn) submitBtn.disabled = true;
     resultTextarea.value = '処理中...';
-    //copyButton.disabled = true;
+    resultTextarea.style.color = '';
 
     try {
-      // FormDataを作成
       const formData = new FormData(form);
-
-      // どのsubmitボタンが押されたかを追加
       if (e.submitter && e.submitter.name) {
         formData.append(e.submitter.name, e.submitter.value);
       }
 
-      // Fetch APIでPOST
       const response = await fetch('/clean', {
         method: 'POST',
         body: formData
       });
 
-      // レスポンスをテキストとして取得
       const result = await response.text();
-
-      // 結果を表示
       resultTextarea.value = result;
-      //copyButton.disabled = false;
 
-      // エラーの場合は赤文字で表示
       if (result.startsWith('Error.')) {
         resultTextarea.style.color = 'red';
       } else {
         resultTextarea.style.color = '';
       }
 
+      // モバイル向け自動スクロール
+      if (window.innerWidth <= 768) {
+        resultTextarea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
     } catch (error) {
       resultTextarea.value = 'Error. 通信エラーが発生しました。';
       resultTextarea.style.color = 'red';
-      copyButton.disabled = false;
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
     }
   });
 
-  // コピーボタンの処理
+  // コピーボタン
   copyButton.addEventListener('click', function() {
-    resultTextarea.select();
     navigator.clipboard.writeText(resultTextarea.value).then(function() {
-      copyStatus.style.display = 'inline';
-      setTimeout(function() {
-        copyStatus.style.display = 'none';
-      }, 2000);
+      copyStatus.classList.remove('hidden');
+      setTimeout(function() { copyStatus.classList.add('hidden'); }, 2000);
     });
   });
 });
