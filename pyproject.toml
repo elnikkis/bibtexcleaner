@@ -9,5 +9,12 @@ dependencies = [
     "gunicorn>=25.1.0",
 ]
 
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["bibtex_schema", "cleaner", "endpoint"]
+
 [tool.uv]
 package = false
