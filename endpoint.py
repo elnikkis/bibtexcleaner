@@ -21,7 +21,13 @@ def clean():
         if "fromtext" in request.form and "bibtext" in request.form:
             bibtext = request.form["bibtext"]
         elif "fromfile" in request.form and "bibfile" in request.files:
-            bibtext = request.files["bibfile"].read().decode("utf-8")
+            try:
+                bibtext = request.files["bibfile"].read().decode("utf-8")
+            except UnicodeDecodeError:
+                return Response(
+                    "Error. ファイルの文字コードがUTF-8ではありません\n",
+                    mimetype="text/plain",
+                )
         else:
             # error
             abort(400)
@@ -42,7 +48,10 @@ def clean():
 
         try:
             cleaned = bibtex_cleaner(bibtext, option)
-        except CleanerException as e:
+        except Exception as e:
+            if not isinstance(e, CleanerException):
+                # 想定外の例外はサーバーログに残し、クライアントには詳細を返さない
+                app.logger.exception("bibtex_cleaner failed")
             return Response(
                 "Error. 入力形式はbibtexですか？（または変換プログラムのバグの可能性があります）\n",
                 mimetype="text/plain",

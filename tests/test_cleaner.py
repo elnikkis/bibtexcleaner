@@ -189,6 +189,18 @@ def test_wrap_title_internal_braces():
     assert result["title"] == "{{foo} and {bar}}"
 
 
+def test_wrap_title_empty():
+    entry = {"title": ""}
+    result = _wrap_title(entry)
+    assert result["title"] == ""
+
+
+def test_wrap_title_single_brace():
+    entry = {"title": "{"}
+    result = _wrap_title(entry)
+    assert result["title"] == "{{}"
+
+
 def test_wrap_title_no_field():
     entry = {"author": "Smith, John"}
     result = _wrap_title(entry)

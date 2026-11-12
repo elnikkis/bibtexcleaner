@@ -177,8 +177,12 @@ def check_parentheses_matching(string, opening, closing):
 def _wrap_title(entry):
     if "title" in entry:
         title = entry["title"]
+        if not title:
+            # 空のtitleは囲まない
+            return entry
         if (
-            title[0] == "{"
+            len(title) >= 2
+            and title[0] == "{"
             and title[-1] == "}"
             and check_parentheses_matching(title[1:-1], "{", "}")
         ):
@@ -318,7 +322,17 @@ def parse_args():
     return parser.parse_args()
 
 
+# Webフォームの初期値と同じ設定
+DEFAULT_CLI_OPTION = {
+    "savetitlecase": False,
+    "replaceid": True,
+    "jauthor": True,
+    "revjauthor": False,
+    "save_doi": False,
+}
+
+
 if __name__ == "__main__":
     args = parse_args()
     bibtex_str = args.bibfile.read()
-    args.outfile.write(bibtex_cleaner(bibtex_str))
+    args.outfile.write(bibtex_cleaner(bibtex_str, DEFAULT_CLI_OPTION))
