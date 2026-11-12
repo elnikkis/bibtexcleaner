@@ -6,11 +6,11 @@ Live at: https://bibtexcleaner.onrender.com/
 
 ## What it does
 
-BibTeX entries exported from tools like Google Scholar or Zotero often contain many extra fields (abstract, URL, ISSN, etc.) that are irrelevant for citation purposes. BibTeX Cleaner keeps only the fields defined as standard for each entry type and normalizes common formatting issues.
+BibTeX entries exported from tools like Google Scholar or Zotero often contain many extra fields (abstract, URL, ISSN, etc.) that are irrelevant for citation purposes. BibTeX Cleaner keeps only the fields needed to identify each reference (author, title, venue, year, volume/number/pages, …) and normalizes common formatting issues.
 
 **Cleaning options:**
 
-- **Strip extra fields** — keeps only standard BibTeX fields per entry type (article, inproceedings, book, etc.)
+- **Strip extra fields** — keeps a minimal set of fields per entry type (article, inproceedings, book, etc., plus the BibLaTeX types online, software, and dataset). Fields whose rendering varies by style, such as `month`, `note`, `doi`, `url`, and conference `address`/`publisher`, are dropped by default (`url` is kept for `@misc`)
 - **Save title case** — wraps titles in `{}` to preserve capitalization in LaTeX
 - **Replace citation keys** — regenerates keys in `Author2024` format from author and year fields
 - **Japanese author names** — removes the comma separator in `姓, 名` formatted Japanese names
@@ -22,6 +22,7 @@ BibTeX entries exported from tools like Google Scholar or Zotero often contain m
 
 - Page ranges are standardized to double-hyphen (`100--110`)
 - Line breaks are removed from author, title, journal, and booktitle fields
+- Entry types the tool does not know (e.g. `@electronic`) are passed through with all their fields; only the formatting normalizations are applied
 - Duplicate citation keys are made unique by appending `a`, `b`, `c`, …
 
 ## Running locally

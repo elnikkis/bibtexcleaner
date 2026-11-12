@@ -13,7 +13,6 @@ from cleaner import (
     _treat_japanese_author,
     clean_entry,
     clean_entries,
-    CleanerException,
     sanitize_field_settings,
     parse_field_list,
 )
@@ -332,14 +331,82 @@ def test_clean_entry_save_doi_false():
     assert "doi" not in result
 
 
-def test_clean_entry_unknown_type_raises():
+def test_clean_entry_unknown_type_keeps_all_fields():
+    # 未知のタイプは、何が消えるのかユーザーから見えないのでフィールドを削らない
     entry = {
         "ID": "X2020",
-        "ENTRYTYPE": "unknowntype",
+        "ENTRYTYPE": "electronic",
         "author": ["Smith, John"],
+        "title": "T",
+        "url": "https://example.com",
+        "abstract": "A",
+        "foo": "bar",
     }
-    with pytest.raises(CleanerException):
-        clean_entry(entry, BASE_OPTION)
+    result = clean_entry(entry, BASE_OPTION)
+    assert result == {
+        "ID": "X2020",
+        "ENTRYTYPE": "electronic",
+        "author": "Smith, John",
+        "title": "T",
+        "url": "https://example.com",
+        "abstract": "A",
+        "foo": "bar",
+    }
+
+
+def test_clean_entry_unknown_type_ignores_misc_field_settings():
+    entry = {"ID": "x", "ENTRYTYPE": "electronic", "title": "T", "note": "n"}
+    option = _with_fields(remove={"misc": ["note"]})
+    assert clean_entry(entry, option)["note"] == "n"
+
+
+def test_clean_entry_unknown_type_replaceid():
+    entry = {"ID": "x", "ENTRYTYPE": "electronic", "author": ["Smith, John"], "year": "2020"}
+    result = clean_entry(entry, {**BASE_OPTION, "replaceid": True})
+    assert result["ID"] == "Smith2020"
+
+
+def test_clean_entry_software_defaults():
+    entry = {
+        "ID": "x",
+        "ENTRYTYPE": "software",
+        "author": ["Doe, Jane"],
+        "title": "Tool",
+        "version": "1.2",
+        "date": "2023-05-01",
+        "url": "https://github.com/x/y",
+        "doi": "10.5281/zenodo.1",
+        "abstract": "A",
+        "keywords": "k",
+    }
+    result = clean_entry(entry, BASE_OPTION)
+    assert result["ENTRYTYPE"] == "software"
+    assert {"version", "date", "url", "doi"} <= set(result)
+    assert "abstract" not in result
+    assert "keywords" not in result
+
+
+def test_clean_entry_online_keeps_urldate():
+    entry = {
+        "ID": "x",
+        "ENTRYTYPE": "online",
+        "title": "Page",
+        "url": "https://example.com",
+        "urldate": "2024-01-01",
+        "langid": "english",
+    }
+    result = clean_entry(entry, BASE_OPTION)
+    assert result["urldate"] == "2024-01-01"
+    assert "langid" not in result
+
+
+def test_bibtex_cleaner_keeps_nonstandard_entries():
+    # bibtexparserは既定で標準外のタイプを黙って捨てるので、消えないことを確認する
+    bib = "@ONLINE{a, title={T}, url={u}}\n@article{b, title={X}, year={2020}}\n"
+    result = bibtex_cleaner(bib, DEFAULT_OPTION)
+    assert result.startswith("@online{a,")
+    assert "url = {u}" in result
+    assert "@article{b," in result
 
 
 # ---------------------------------------------------------------------------
@@ -452,19 +519,6 @@ def test_bibtex_cleaner_replaceid():
     option = {**DEFAULT_OPTION, "replaceid": True}
     result = bibtex_cleaner(INPROCEEDINGS_BIB, option)
     assert "Doe2021" in result
-
-
-def test_bibtex_cleaner_unknown_type_silently_ignored():
-    # bibtexparser silently drops unknown entry types; no exception is raised
-    bib = """
-@unknowntype{X2020,
-  author = {Smith, John},
-  title = {A Title},
-  year = {2020},
-}
-"""
-    result = bibtex_cleaner(bib, DEFAULT_OPTION)
-    assert "X2020" not in result
 
 
 def test_bibtex_cleaner_multiple_entries():
@@ -648,3 +702,70 @@ def test_bibtex_cleaner_mastersthesis():
     assert result.startswith("@mastersthesis{x,")
     assert "school = {S}" in result
     assert "url" not in result
+
+
+# ---------------------------------------------------------------------------
+# 既定で残すフィールド
+# ---------------------------------------------------------------------------
+
+def test_conference_defaults_match_inproceedings():
+    # @conference は @inproceedings の別名なので、残すフィールドも同じにする
+    assert required_fields["conference"] == required_fields["inproceedings"]
+
+
+@pytest.mark.parametrize("entrytype", list(required_fields))
+def test_defaults_drop_month(entrytype):
+    # monthはスタイルによって出たり出なかったりするので、どのタイプでも既定では落とす
+    assert "month" not in required_fields[entrytype]
+
+
+def test_conference_drops_venue_details():
+    entry = {
+        "ID": "x",
+        "ENTRYTYPE": "conference",
+        "author": ["Smith, John"],
+        "title": "T",
+        "booktitle": "Proc. X",
+        "year": "2020",
+        "pages": "1--10",
+        "address": "Tokyo, Japan",
+        "month": "jun",
+        "organization": "IEEE",
+        "publisher": "IEEE",
+        "editor": "Doe, Jane",
+        "note": "n",
+    }
+    result = clean_entry(entry, BASE_OPTION)
+    assert set(result) == {"ID", "ENTRYTYPE", "author", "title", "booktitle", "year", "pages"}
+
+
+def test_book_keeps_editor_and_address():
+    # 編著書は著者がおらず編者だけのことがある
+    entry = {
+        "ID": "x",
+        "ENTRYTYPE": "book",
+        "editor": "Doe, Jane",
+        "title": "T",
+        "publisher": "P",
+        "address": "New York",
+        "year": "2020",
+    }
+    result = clean_entry(entry, BASE_OPTION)
+    assert result["editor"] == "Doe, Jane"
+    assert result["address"] == "New York"
+
+
+def test_misc_keeps_url():
+    # miscはウェブページやソフトウェアなどに使われ、urlがないと特定できない
+    entry = {
+        "ID": "x",
+        "ENTRYTYPE": "misc",
+        "author": ["Smith, John"],
+        "title": "T",
+        "year": "2020",
+        "url": "https://example.com",
+        "month": "jun",
+    }
+    result = clean_entry(entry, BASE_OPTION)
+    assert result["url"] == "https://example.com"
+    assert "month" not in result
