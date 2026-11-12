@@ -639,3 +639,12 @@ def test_bibtex_cleaner_with_field_settings():
     result = bibtex_cleaner(INPROCEEDINGS_BIB, option)
     assert "doi = {10.1234/foo}" in result
     assert "pages" not in result
+
+
+def test_bibtex_cleaner_mastersthesis():
+    # BibTeXの標準タイプ名は mastersthesis（masterthesis ではない）
+    bib = "@mastersthesis{x, author={Doe, John}, title={T}, school={S}, year={2020}, url={u}}"
+    result = bibtex_cleaner(bib, DEFAULT_OPTION)
+    assert result.startswith("@mastersthesis{x,")
+    assert "school = {S}" in result
+    assert "url" not in result

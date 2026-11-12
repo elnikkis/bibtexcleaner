@@ -21,7 +21,7 @@ required = {
         "note",
         "key",
     ],
-    "masterthesis": [
+    "mastersthesis": [
         "author",
         "title",
         "school",
