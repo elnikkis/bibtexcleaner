@@ -1,4 +1,13 @@
-# from Wikipedia (https://ja.wikipedia.org/wiki/BibTeX)
+# 各エントリタイプで既定で残すフィールド
+# 方針: 文献の特定に必要なもの（著者・題・掲載先・年・巻号頁）を残し、
+# スタイルによって出たり出なかったりして体裁を崩しやすいもの
+# （month, note, organization, doi, url, 会議の開催地・出版社・編者）は落とす。
+# ただし、それがないと文献を特定できないもの（編著書のeditor、miscのurl、
+# unpublishedのnote）や、出版地としてのaddress（book, thesis, techreportなど）は残す。
+# 標準のフィールド一覧は https://ja.wikipedia.org/wiki/BibTeX を参照
+_inproceedings = ["author", "title", "booktitle", "year", "pages", "key"]
+_thesis = ["author", "title", "school", "address", "year", "key"]
+
 required = {
     "article": [
         "author",
@@ -10,58 +19,27 @@ required = {
         "pages",
         "key",
     ],
-    "inproceedings": ["author", "title", "booktitle", "year", "pages", "key"],
-    "phdthesis": [
-        "author",
-        "title",
-        "school",
-        "year",
-        "address",
-        "month",
-        "note",
-        "key",
-    ],
-    "mastersthesis": [
-        "author",
-        "title",
-        "school",
-        "year",
-        "address",
-        "month",
-        "note",
-        "key",
-    ],
+    "inproceedings": list(_inproceedings),
+    "phdthesis": list(_thesis),
+    "mastersthesis": list(_thesis),
     "proceedings": [
+        "editor",
         "title",
         "year",
-        "editor",
         "publisher",
-        "organization",
-        "address",
-        "month",
-        "note",
-        "key",
         "volume",
         "number",
-    ],
-    "conference": [
-        "author",
-        "title",
-        "booktitle",
-        "year",
-        "editor",
-        "pages",
-        "organization",
-        "publisher",
-        "address",
-        "month",
-        "note",
+        "series",
         "key",
     ],
+    # BibTeXでは@conferenceは@inproceedingsの別名なので同じにする
+    "conference": list(_inproceedings),
     "book": [
         "author",
+        "editor",
         "title",
         "publisher",
+        "address",
         "year",
         "volume",
         "series",
@@ -69,13 +47,11 @@ required = {
         "key",
     ],
     "booklet": [
-        "title",
         "author",
+        "title",
         "howpublished",
         "address",
-        "month",
         "year",
-        "note",
         "key",
     ],
     "inbook": [
@@ -85,54 +61,74 @@ required = {
         "chapter",
         "pages",
         "publisher",
+        "address",
         "year",
         "volume",
         "series",
-        "address",
         "edition",
-        "month",
-        "note",
         "key",
     ],
     "incollection": [
         "author",
         "title",
         "booktitle",
-        "year",
         "editor",
-        "pages",
-        "organization",
         "publisher",
         "address",
-        "month",
-        "note",
+        "year",
+        "pages",
         "key",
     ],
     "manual": [
-        "title",
         "author",
+        "title",
         "organization",
         "address",
         "edition",
-        "month",
         "year",
-        "note",
         "key",
     ],
     "techreport": [
         "author",
         "title",
         "institution",
-        "year",
         "type",
         "number",
         "address",
-        "month",
-        "note",
+        "year",
         "key",
     ],
-    "misc": ["author", "title", "howpublished", "month", "year", "note", "key"],
-    "unpublished": ["author", "title", "note", "month", "year", "key"],
+    # miscはウェブページ・ソフトウェア・データセット・arXivなどに使われ、urlがないと特定できない
+    "misc": ["author", "title", "howpublished", "year", "note", "url", "key"],
+    # unpublishedではnoteが必須フィールド
+    "unpublished": ["author", "title", "note", "year", "key"],
+    # 以下はBibLaTeXでよく使われるタイプ。
+    # BibLaTeX形式のエクスポートではyearの代わりにdateが入ることが多いので両方残す。
+    "online": ["author", "title", "organization", "year", "date", "url", "urldate", "key"],
+    # software・datasetではDOI（Zenodoなど）が主な識別子になる
+    "software": [
+        "author",
+        "title",
+        "version",
+        "organization",
+        "publisher",
+        "year",
+        "date",
+        "url",
+        "doi",
+        "key",
+    ],
+    "dataset": [
+        "author",
+        "title",
+        "version",
+        "publisher",
+        "year",
+        "date",
+        "url",
+        "doi",
+        "key",
+    ],
 }
 
 # 「全タイプ一括」で残す・消すを切り替えられるようにするフィールド
@@ -142,5 +138,5 @@ common = ["doi", "url", "isbn", "month", "note", "key", "publisher", "address", 
 suggestions = sorted(
     {field for fields in required.values() for field in fields}
     | set(common)
-    | {"issn", "eprint", "archiveprefix", "primaryclass", "urldate", "language"}
+    | {"articleno", "numpages", "issn", "eprint", "archiveprefix", "primaryclass", "urldate", "language"}
 )

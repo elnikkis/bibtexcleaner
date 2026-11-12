@@ -307,10 +307,15 @@ def _field_sets(entrytype, option):
 
 def clean_entry(entry, option):
     # 必要なフィールドだけ取り出す
-    working, output = _field_sets(entry["ENTRYTYPE"], option)
+    # 未知のエントリタイプは、何が消えるのかユーザーから見えないので、フィールドを削らずに通す
+    entrytype = entry["ENTRYTYPE"]
+    if entrytype in required_fields:
+        working, output = _field_sets(entrytype, option)
+    else:
+        working = output = set(entry) - {"ID", "ENTRYTYPE"}
     e = {}
     e["ID"] = entry["ID"]
-    e["ENTRYTYPE"] = entry["ENTRYTYPE"]
+    e["ENTRYTYPE"] = entrytype
     for item in entry.keys():
         if item in working:
             e[item] = entry[item]
@@ -382,7 +387,8 @@ def bibtex_cleaner(bibtext, option):
         str: 整形されたBibTex
     """
     try:
-        parser = BibTexParser(customization=parser_customizations)
+        # 既定では標準外のエントリタイプは黙って捨てられるので、読み込むようにする
+        parser = BibTexParser(customization=parser_customizations, ignore_nonstandard_types=False)
         bib_database = bibtexparser.loads(bibtext, parser=parser)
         cleaned_database = clean_entries(bib_database, option)
         writer = BibTexWriter()
