@@ -14,7 +14,10 @@ from cleaner import (
     clean_entry,
     clean_entries,
     CleanerException,
+    sanitize_field_settings,
+    parse_field_list,
 )
+from bibtex_schema import required as required_fields
 
 
 # ---------------------------------------------------------------------------
@@ -507,3 +510,132 @@ year = {1998}
     ret = bibtex_cleaner(bibtext, option)
     cleaned = "@article{Watts1998,\n  author = {Watts, Duncan J and Strogatz, Steven H},\n  journal = {Nature},\n  number = {6684},\n  pages = {440--442},\n  title = {{Collective dynamics of `small-world' networks}},\n  volume = {393},\n  year = {1998}\n}\n"
     assert ret == cleaned
+
+
+SORT_BIB = """
+@misc{Zeta2020,
+  author = {Zeta, Z},
+  title = {Z},
+  year = {2020},
+}
+@misc{Alpha2021,
+  author = {Alpha, A},
+  title = {A},
+  year = {2021},
+}
+"""
+
+
+def test_bibtex_cleaner_sort_default_is_input():
+    result = bibtex_cleaner(SORT_BIB, DEFAULT_OPTION)
+    assert result.index("Zeta2020") < result.index("Alpha2021")
+
+
+def test_bibtex_cleaner_sort_id():
+    result = bibtex_cleaner(SORT_BIB, {**DEFAULT_OPTION, "sort": "id"})
+    assert result.index("Alpha2021") < result.index("Zeta2020")
+
+
+def test_bibtex_cleaner_sort_input():
+    result = bibtex_cleaner(SORT_BIB, {**DEFAULT_OPTION, "sort": "input"})
+    assert result.index("Zeta2020") < result.index("Alpha2021")
+
+
+# ---------------------------------------------------------------------------
+# 残す・消すフィールドの選択 (#12)
+# ---------------------------------------------------------------------------
+
+ARTICLE_ENTRY = {
+    "ID": "orig",
+    "ENTRYTYPE": "article",
+    "author": ["Smith, John"],
+    "title": "A Title",
+    "journal": "Nature",
+    "year": "2020",
+    "number": "2",
+    "doi": "10.1234/test",
+    "url": "https://example.com",
+    "publisher": "Springer",
+}
+
+
+def _with_fields(add=None, remove=None, **kwargs):
+    return {**BASE_OPTION, **kwargs, "fields": {"add": add or {}, "remove": remove or {}}}
+
+
+def test_clean_entry_add_field_for_type():
+    result = clean_entry(dict(ARTICLE_ENTRY), _with_fields(add={"article": ["doi", "url"]}))
+    assert result["doi"] == "10.1234/test"
+    assert result["url"] == "https://example.com"
+    assert "publisher" not in result
+
+
+def test_clean_entry_add_field_other_type_has_no_effect():
+    result = clean_entry(dict(ARTICLE_ENTRY), _with_fields(add={"inproceedings": ["publisher"]}))
+    assert "publisher" not in result
+
+
+def test_clean_entry_remove_default_field():
+    result = clean_entry(dict(ARTICLE_ENTRY), _with_fields(remove={"article": ["number"]}))
+    assert "number" not in result
+    assert result["journal"] == "Nature"
+
+
+def test_clean_entry_removed_author_still_used_for_id():
+    option = _with_fields(remove={"article": ["author", "year"]}, replaceid=True)
+    result = clean_entry(dict(ARTICLE_ENTRY), option)
+    assert result["ID"] == "Smith2020"
+    assert "author" not in result
+    assert "year" not in result
+
+
+def test_clean_entry_save_doi_combined_with_fields():
+    option = _with_fields(add={"article": ["url"]}, save_doi=True)
+    result = clean_entry(dict(ARTICLE_ENTRY), option)
+    assert "doi" in result
+    assert "url" in result
+
+
+def test_clean_entry_default_proceedings_id_unchanged():
+    # proceedingsは既定でauthorを残さないので、従来どおりIDは置換されない
+    entry = {"ID": "orig", "ENTRYTYPE": "proceedings", "author": ["Smith, John"], "title": "T", "year": "2020"}
+    result = clean_entry(entry, {**BASE_OPTION, "replaceid": True})
+    assert result["ID"] == "orig"
+    assert "author" not in result
+
+
+def test_sanitize_field_settings_filters_invalid_values():
+    data = {
+        "add": {"article": ["DOI", " url ", "bad name", 1, "doi"], "unknowntype": ["doi"], "book": "doi"},
+        "remove": {"article": ["note"]},
+        "other": {},
+    }
+    assert sanitize_field_settings(data) == {
+        "add": {"article": ["doi", "url"]},
+        "remove": {"article": ["note"]},
+    }
+
+
+@pytest.mark.parametrize("data", [None, [], "x", {"add": []}, {"add": {"article": None}}])
+def test_sanitize_field_settings_malformed(data):
+    assert sanitize_field_settings(data) == {"add": {}, "remove": {}}
+
+
+def test_parse_field_list_all_types_and_specific_type():
+    result = parse_field_list("doi, inproceedings:Publisher")
+    assert set(result) == set(required_fields)
+    assert result["article"] == ["doi"]
+    assert result["inproceedings"] == ["doi", "publisher"]
+
+
+@pytest.mark.parametrize("text", ["bad name!", "nosuchtype:doi", "article:"])
+def test_parse_field_list_invalid(text):
+    with pytest.raises(ValueError):
+        parse_field_list(text)
+
+
+def test_bibtex_cleaner_with_field_settings():
+    option = {**DEFAULT_OPTION, "fields": {"add": {"inproceedings": ["doi"]}, "remove": {"inproceedings": ["pages"]}}}
+    result = bibtex_cleaner(INPROCEEDINGS_BIB, option)
+    assert "doi = {10.1234/foo}" in result
+    assert "pages" not in result

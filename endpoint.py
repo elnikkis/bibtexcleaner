@@ -1,18 +1,47 @@
 # coding: utf-8
 
+import json
+
 from flask import Flask, render_template, request, Response, abort
-from cleaner import bibtex_cleaner, CleanerException
+from cleaner import (
+    bibtex_cleaner,
+    CleanerException,
+    SORT_ORDERS,
+    sanitize_field_settings,
+)
+import bibtex_schema
+
+# フィールド設定（JSON）として受け付ける最大長
+MAX_FIELDS_JSON_LENGTH = 100_000
 
 app = Flask(__name__)
 
 
 class Setting:
+    # save_doiは旧フォームとの互換のため受け付ける（現在のUIではfieldsで指定する）
     items = ["savetitlecase", "replaceid", "jauthor", "revjauthor", "save_doi"]
+
+
+def parse_fields_option(text):
+    """フォームの "fields"（既定からの差分のJSON）を解釈する。不正なら差分なし"""
+    if not text or len(text) > MAX_FIELDS_JSON_LENGTH:
+        return sanitize_field_settings(None)
+    try:
+        data = json.loads(text)
+    except ValueError:
+        data = None
+    return sanitize_field_settings(data)
 
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template(
+        "index.html",
+        # tojsonは辞書のキーをソートしてしまうので、表示順を保つため[type, fields]の列で渡す
+        schema=list(bibtex_schema.required.items()),
+        common_fields=bibtex_schema.common,
+        field_suggestions=bibtex_schema.suggestions,
+    )
 
 
 @app.route("/clean", methods=["POST"])
@@ -45,6 +74,9 @@ def clean():
                 option[opt] = True
             else:
                 option[opt] = False
+        sort = request.form.get("sort", "input")
+        option["sort"] = sort if sort in SORT_ORDERS else "input"
+        option["fields"] = parse_fields_option(request.form.get("fields"))
 
         try:
             cleaned = bibtex_cleaner(bibtext, option)

@@ -10,6 +10,7 @@ required = {
         "pages",
         "key",
     ],
+    "inproceedings": ["author", "title", "booktitle", "year", "pages", "key"],
     "phdthesis": [
         "author",
         "title",
@@ -43,7 +44,6 @@ required = {
         "volume",
         "number",
     ],
-    "inproceedings": ["author", "title", "booktitle", "year", "pages", "key"],
     "conference": [
         "author",
         "title",
@@ -134,3 +134,13 @@ required = {
     "misc": ["author", "title", "howpublished", "month", "year", "note", "key"],
     "unpublished": ["author", "title", "note", "month", "year", "key"],
 }
+
+# 「全タイプ一括」で残す・消すを切り替えられるようにするフィールド
+common = ["doi", "url", "isbn", "month", "note", "key", "publisher", "address", "editor"]
+
+# フィールド追加入力の候補（自由入力も可能）
+suggestions = sorted(
+    {field for fields in required.values() for field in fields}
+    | set(common)
+    | {"issn", "eprint", "archiveprefix", "primaryclass", "urldate", "language"}
+)

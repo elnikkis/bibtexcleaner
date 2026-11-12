@@ -26,7 +26,11 @@
           <label><input type="checkbox" name="replaceid" checked>IDをauthor+year形式に置換（例：Cheng2017）</label>
           <label><input type="checkbox" name="jauthor" checked>日本人著者名のカンマを除去する</label>
           <label><input type="checkbox" name="revjauthor">日本人著者の姓と名を入れ替える</label>
-          <label><input type="checkbox" name="save_doi">DOIフィールドを保持する</label>
+          <div class="radio-group">
+            <span>出力順：</span>
+            <label><input type="radio" name="sort" value="input" checked>入力順</label>
+            <label><input type="radio" name="sort" value="id">ID順</label>
+          </div>
         </div>
 
         <!-- タブ -->
@@ -63,158 +67,32 @@
     </div>
   </form>
 
-  <!-- フィールドリスト（折りたたみ） -->
-  <details class="field-reference">
-    <summary>残されるフィールドリスト</summary>
+  <!-- 残すフィールドの設定（折りたたみ） -->
+  <details class="field-reference" id="field-settings">
+    <summary>残すフィールドの設定（DOI・URLなど）<span id="field-summary" class="field-summary"></span></summary>
     <div class="field-reference-body">
-      <p>以下のフィールドの他、「DOIフィールドを保持する」オプションをONにした場合、doiフィールドも残ります。</p>
-      <dl class="fieldlist">
-        <dt>article</dt>
-          <dd>author</dd>
-          <dd>title</dd>
-          <dd>journal</dd>
-          <dd>year</dd>
-          <dd>volume</dd>
-          <dd>number</dd>
-          <dd>pages</dd>
-          <dd>key</dd>
-        <dt>inproceedings</dt>
-          <dd>author</dd>
-          <dd>title</dd>
-          <dd>booktitle</dd>
-          <dd>year</dd>
-          <dd>pages</dd>
-          <dd>key</dd>
-        <dt>phdthesis</dt>
-          <dd>author</dd>
-          <dd>title</dd>
-          <dd>school</dd>
-          <dd>year</dd>
-          <dd>address</dd>
-          <dd>month</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-        <dt>masterthesis</dt>
-          <dd>author</dd>
-          <dd>title</dd>
-          <dd>school</dd>
-          <dd>year</dd>
-          <dd>address</dd>
-          <dd>month</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-        <dt>proceedings</dt>
-          <dd>title</dd>
-          <dd>year</dd>
-          <dd>editor</dd>
-          <dd>publisher</dd>
-          <dd>organization</dd>
-          <dd>address</dd>
-          <dd>month</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-          <dd>volume</dd>
-          <dd>number</dd>
-        <dt>conference</dt>
-          <dd>author</dd>
-          <dd>title</dd>
-          <dd>booktitle</dd>
-          <dd>year</dd>
-          <dd>editor</dd>
-          <dd>pages</dd>
-          <dd>organization</dd>
-          <dd>publisher</dd>
-          <dd>address</dd>
-          <dd>month</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-        <dt>book</dt>
-          <dd>author</dd>
-          <dd>editor</dd>
-          <dd>title</dd>
-          <dd>publisher</dd>
-          <dd>year</dd>
-          <dd>volume</dd>
-          <dd>series</dd>
-          <dd>address</dd>
-          <dd>edition</dd>
-          <dd>month</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-        <dt>booklet</dt>
-          <dd>title</dd>
-          <dd>author</dd>
-          <dd>howpublished</dd>
-          <dd>address</dd>
-          <dd>month</dd>
-          <dd>year</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-        <dt>inbook</dt>
-          <dd>author</dd>
-          <dd>editor</dd>
-          <dd>title</dd>
-          <dd>chapter</dd>
-          <dd>pages</dd>
-          <dd>publisher</dd>
-          <dd>year</dd>
-          <dd>volume</dd>
-          <dd>series</dd>
-          <dd>address</dd>
-          <dd>edition</dd>
-          <dd>month</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-        <dt>incollection</dt>
-          <dd>author</dd>
-          <dd>title</dd>
-          <dd>booktitle</dd>
-          <dd>year</dd>
-          <dd>editor</dd>
-          <dd>pages</dd>
-          <dd>organization</dd>
-          <dd>publisher</dd>
-          <dd>address</dd>
-          <dd>month</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-        <dt>manual</dt>
-          <dd>title</dd>
-          <dd>author</dd>
-          <dd>organization</dd>
-          <dd>address</dd>
-          <dd>edition</dd>
-          <dd>month</dd>
-          <dd>year</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-        <dt>techreport</dt>
-          <dd>author</dd>
-          <dd>title</dd>
-          <dd>institution</dd>
-          <dd>year</dd>
-          <dd>type</dd>
-          <dd>number</dd>
-          <dd>address</dd>
-          <dd>month</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-        <dt>misc</dt>
-          <dd>author</dd>
-          <dd>title</dd>
-          <dd>howpublished</dd>
-          <dd>month</dd>
-          <dd>year</dd>
-          <dd>note</dd>
-          <dd>key</dd>
-        <dt>unpublished</dt>
-          <dd>author</dd>
-          <dd>title</dd>
-          <dd>note</dd>
-          <dd>month</dd>
-          <dd>year</dd>
-          <dd>key</dd>
-      </dl>
+      <p>チェックしたフィールドが、入力にあれば出力に残ります。設定はこのブラウザに保存されます。</p>
+
+      <section class="bulk-fields">
+        <div class="bulk-header">
+          <h2>全タイプ一括</h2>
+          <button type="button" id="field-reset" class="small-btn">既定に戻す</button>
+        </div>
+        <div id="bulk-field-list" class="chip-list"></div>
+        <div class="field-add">
+          <input type="text" id="bulk-field-input" list="field-suggestions" placeholder="フィールド名（例: eprint）" aria-label="全タイプに追加するフィールド名">
+          <button type="button" id="bulk-field-add" class="small-btn">全タイプに追加</button>
+        </div>
+        <p class="field-legend">✔ 全タイプで残す ／ 空 全タイプで消す ／ ▬ タイプにより異なる</p>
+      </section>
+
+      <div id="type-field-grid" class="type-grid"></div>
+
+      <datalist id="field-suggestions">
+        {%- for field in field_suggestions %}
+        <option value="{{ field }}">
+        {%- endfor %}
+      </datalist>
     </div>
   </details>
 </main>
@@ -222,7 +100,6 @@
 <footer>
   <p>作りが甘いので、バグを発見したら教えてください。</p>
   <p>GitHub: <a href="https://github.com/elnikkis/bibtexcleaner">https://github.com/elnikkis/bibtexcleaner</a></p>
-  <address>作成者：<a href="https://twitter.com/elnikkis">@elnikkis</a></address>
 </footer>
 
 <script>
@@ -231,6 +108,295 @@ document.addEventListener('DOMContentLoaded', function() {
   const resultTextarea = document.getElementById('result-textarea');
   const copyButton = document.getElementById('copy-button');
   const copyStatus = document.getElementById('copy-status');
+
+  // 設定値の保存・復元 (localStorage)
+  const SETTINGS_KEY = 'bibtexcleaner.settings';
+  const settingInputs = document.querySelectorAll('.settings-grid input[type="checkbox"], .settings-grid input[type="radio"]');
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    settingInputs.forEach(function(input) {
+      const value = saved[input.name];
+      if (input.type === 'checkbox') {
+        if (typeof value === 'boolean') input.checked = value;
+      } else if (input.type === 'radio') {
+        // 保存値に一致するラジオボタンがあるときだけ選択を変える
+        const hasMatch = Array.prototype.some.call(settingInputs, function(i) {
+          return i.type === 'radio' && i.name === input.name && i.value === value;
+        });
+        if (hasMatch) input.checked = (input.value === value);
+      }
+    });
+  } catch (err) {
+    // 保存値が壊れている・ストレージが使えない場合は初期値のまま
+  }
+
+  function saveSettings() {
+    const values = {};
+    settingInputs.forEach(function(input) {
+      if (input.type === 'checkbox') {
+        values[input.name] = input.checked;
+      } else if (input.type === 'radio' && input.checked) {
+        values[input.name] = input.value;
+      }
+    });
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(values));
+    } catch (err) {
+      // ストレージが使えない環境では保存しない
+    }
+  }
+
+  settingInputs.forEach(function(input) {
+    input.addEventListener('change', saveSettings);
+  });
+
+  // ---- 残すフィールドの設定 ----
+  // 既定（エントリタイプごとのフィールドリスト）からの差分だけを状態として持つ。
+  //   add:    既定にないが残すフィールド    { entrytype: [field, ...] }
+  //   remove: 既定にあるが消すフィールド    { entrytype: [field, ...] }
+  // 「全タイプ一括」の表示はこの状態から毎回計算する。
+  const SCHEMA = {};
+  const TYPES = [];
+  ({{ schema | tojson }}).forEach(function(pair) {
+    TYPES.push(pair[0]);
+    SCHEMA[pair[0]] = pair[1];
+  });
+  const COMMON_FIELDS = {{ common_fields | tojson }};
+  const FIELDS_KEY = 'bibtexcleaner.fields';
+  const FIELD_NAME_RE = /^[a-z][a-z0-9_.\-]*$/;
+  const bulkList = document.getElementById('bulk-field-list');
+  const typeGrid = document.getElementById('type-field-grid');
+  const fieldSummary = document.getElementById('field-summary');
+  const bulkInput = document.getElementById('bulk-field-input');
+  let fieldState = { add: {}, remove: {} };
+  // 一括追加したフィールドは、全タイプでOFFにしても一括欄に残す（このページを開いている間）
+  const bulkExtras = new Set();
+
+  function normalizeFieldName(name) {
+    name = String(name).trim().toLowerCase();
+    return (name.length <= 64 && FIELD_NAME_RE.test(name)) ? name : null;
+  }
+
+  function isDefault(type, field) {
+    return SCHEMA[type].indexOf(field) !== -1;
+  }
+
+  function isKept(type, field) {
+    if (isDefault(type, field)) {
+      return (fieldState.remove[type] || []).indexOf(field) === -1;
+    }
+    return (fieldState.add[type] || []).indexOf(field) !== -1;
+  }
+
+  function setKept(type, field, keep) {
+    const def = isDefault(type, field);
+    const kind = def ? 'remove' : 'add';
+    const list = (fieldState[kind][type] || []).filter(function(f) { return f !== field; });
+    if (def ? !keep : keep) list.push(field);
+    if (list.length) {
+      fieldState[kind][type] = list;
+    } else {
+      delete fieldState[kind][type];
+    }
+  }
+
+  function keptTypeCount(field) {
+    return TYPES.filter(function(t) { return isKept(t, field); }).length;
+  }
+
+  function saveFieldState() {
+    try {
+      localStorage.setItem(FIELDS_KEY, JSON.stringify(fieldState));
+    } catch (err) {
+      // ストレージが使えない環境では保存しない
+    }
+  }
+
+  function loadFieldState() {
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(FIELDS_KEY));
+    } catch (err) {
+      saved = null;
+    }
+    if (saved && typeof saved === 'object') {
+      ['add', 'remove'].forEach(function(kind) {
+        const perType = saved[kind];
+        if (!perType || typeof perType !== 'object') return;
+        TYPES.forEach(function(type) {
+          if (!Array.isArray(perType[type])) return;
+          perType[type].forEach(function(f) {
+            const name = normalizeFieldName(f);
+            if (name) setKept(type, name, kind === 'add');
+          });
+        });
+      });
+    } else {
+      // 旧オプション「DOIフィールドを保持する」からの移行
+      try {
+        const old = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+        if (old && old.save_doi === true) {
+          TYPES.forEach(function(t) { setKept(t, 'doi', true); });
+        }
+      } catch (err) {
+        // 移行できなくても既定のまま使える
+      }
+    }
+    saveFieldState();
+  }
+
+  function bulkFields() {
+    const extras = new Set(bulkExtras);
+    Object.keys(fieldState.add).forEach(function(t) {
+      fieldState.add[t].forEach(function(f) { extras.add(f); });
+    });
+    COMMON_FIELDS.forEach(function(f) { extras.delete(f); });
+    return COMMON_FIELDS.concat(Array.from(extras).sort());
+  }
+
+  function makeCheckbox(labelText, checked, onChange, className) {
+    const label = document.createElement('label');
+    if (className) label.className = className;
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = checked;
+    input.addEventListener('change', function() { onChange(input); });
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    label.appendChild(input);
+    label.appendChild(span);
+    return { label: label, input: input };
+  }
+
+  // フィールド追加用の入力欄。不正な名前はブラウザ標準のバリデーション表示で知らせる
+  function readFieldInput(input) {
+    const name = normalizeFieldName(input.value);
+    if (!name) {
+      input.setCustomValidity('英小文字で始まる英数字・_ . - のフィールド名を入力してください');
+      input.reportValidity();
+      return null;
+    }
+    input.setCustomValidity('');
+    return name;
+  }
+
+  function updateFieldSummary() {
+    const parts = [];
+    [['add', '+', false], ['remove', '−', true]].forEach(function(spec) {
+      const kind = spec[0], sign = spec[1], wantDefault = spec[2];
+      const counts = {};
+      Object.keys(fieldState[kind]).forEach(function(t) {
+        fieldState[kind][t].forEach(function(f) { counts[f] = (counts[f] || 0) + 1; });
+      });
+      Object.keys(counts).sort().forEach(function(f) {
+        // 「全タイプ」= 追加ならそのフィールドが既定にないタイプ、削除なら既定にあるタイプのすべて
+        const total = TYPES.filter(function(t) { return isDefault(t, f) === wantDefault; }).length;
+        parts.push(sign + f + (counts[f] < total ? '（一部）' : ''));
+      });
+    });
+    if (parts.length === 0) {
+      fieldSummary.textContent = '';
+    } else if (parts.length > 6) {
+      fieldSummary.textContent = '（変更あり: ' + parts.slice(0, 6).join(', ') + ' ほか' + (parts.length - 6) + '件）';
+    } else {
+      fieldSummary.textContent = '（変更あり: ' + parts.join(', ') + '）';
+    }
+  }
+
+  function renderFields() {
+    // 全タイプ一括
+    bulkList.textContent = '';
+    bulkFields().forEach(function(field) {
+      const count = keptTypeCount(field);
+      const cb = makeCheckbox(field, count === TYPES.length, function(input) {
+        TYPES.forEach(function(t) { setKept(t, field, input.checked); });
+        onFieldStateChange();
+      }, 'chip');
+      cb.input.indeterminate = count > 0 && count < TYPES.length;
+      bulkList.appendChild(cb.label);
+    });
+
+    // エントリタイプごと
+    typeGrid.textContent = '';
+    TYPES.forEach(function(type) {
+      const card = document.createElement('div');
+      card.className = 'type-card';
+      const title = document.createElement('h3');
+      title.textContent = type;
+      card.appendChild(title);
+
+      const list = document.createElement('div');
+      list.className = 'type-field-list';
+      const fields = SCHEMA[type].concat(fieldState.add[type] || []);
+      fields.forEach(function(field) {
+        const cb = makeCheckbox(field, isKept(type, field), function(input) {
+          setKept(type, field, input.checked);
+          onFieldStateChange();
+        }, isDefault(type, field) ? 'field-default' : 'field-added');
+        list.appendChild(cb.label);
+      });
+      card.appendChild(list);
+
+      const addRow = document.createElement('div');
+      addRow.className = 'field-add';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.setAttribute('list', 'field-suggestions');
+      input.placeholder = 'フィールド名';
+      input.setAttribute('aria-label', type + ' に追加するフィールド名');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'small-btn';
+      button.textContent = '追加';
+      function add() {
+        const name = readFieldInput(input);
+        if (!name) return;
+        setKept(type, name, true);
+        onFieldStateChange();
+      }
+      button.addEventListener('click', add);
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); add(); }
+      });
+      input.addEventListener('input', function() { input.setCustomValidity(''); });
+      addRow.appendChild(input);
+      addRow.appendChild(button);
+      card.appendChild(addRow);
+
+      typeGrid.appendChild(card);
+    });
+
+    updateFieldSummary();
+  }
+
+  function onFieldStateChange() {
+    saveFieldState();
+    renderFields();
+  }
+
+  function addBulkField() {
+    const name = readFieldInput(bulkInput);
+    if (!name) return;
+    bulkExtras.add(name);
+    TYPES.forEach(function(t) { setKept(t, name, true); });
+    bulkInput.value = '';
+    onFieldStateChange();
+  }
+
+  document.getElementById('bulk-field-add').addEventListener('click', addBulkField);
+  bulkInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addBulkField(); }
+  });
+  bulkInput.addEventListener('input', function() { bulkInput.setCustomValidity(''); });
+  document.getElementById('field-reset').addEventListener('click', function() {
+    fieldState = { add: {}, remove: {} };
+    bulkExtras.clear();
+    onFieldStateChange();
+  });
+
+  loadFieldState();
+  renderFields();
 
   // タブ切り替え
   document.querySelectorAll('.tab-btn').forEach(function(btn) {
@@ -253,6 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     try {
       const formData = new FormData(form);
+      formData.set('fields', JSON.stringify(fieldState));
       if (e.submitter && e.submitter.name) {
         formData.append(e.submitter.name, e.submitter.value);
       }
