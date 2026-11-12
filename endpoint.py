@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from flask import Flask, render_template, request, Response, abort
-from cleaner import bibtex_cleaner, CleanerException
+from cleaner import bibtex_cleaner, CleanerException, SORT_ORDERS
 
 app = Flask(__name__)
 
@@ -45,6 +45,8 @@ def clean():
                 option[opt] = True
             else:
                 option[opt] = False
+        sort = request.form.get("sort", "id")
+        option["sort"] = sort if sort in SORT_ORDERS else "id"
 
         try:
             cleaned = bibtex_cleaner(bibtext, option)

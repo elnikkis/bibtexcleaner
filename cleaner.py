@@ -74,6 +74,10 @@ class CleanerException(Exception):
     pass
 
 
+# 出力エントリの並び順: "id" = ID（引用キー）順, "input" = 入力順
+SORT_ORDERS = ("id", "input")
+
+
 def print_required_fields_as_html():
     """Cleanerが残すフィールド定義辞書の中身を出力する"""
     fd = sys.stdout
@@ -296,6 +300,11 @@ def bibtex_cleaner(bibtext, option):
         cleaned_database = clean_entries(bib_database, option)
         writer = BibTexWriter()
         writer.indent = "  "
+        if option.get("sort", "id") == "input":
+            # 並び替えず入力順のまま出力する
+            writer.order_entries_by = None
+        else:
+            writer.order_entries_by = ("ID",)
         return writer.write(cleaned_database)
     except CleanerException as e:
         raise
@@ -319,6 +328,12 @@ def parse_args():
         default=sys.stdout,
         help="きれいなbibファイル名（出力ファイル名; default: stdout）",
     )
+    parser.add_argument(
+        "--sort",
+        choices=SORT_ORDERS,
+        default="id",
+        help="出力エントリの並び順（id: ID順, input: 入力順; default: id）",
+    )
     return parser.parse_args()
 
 
@@ -329,10 +344,12 @@ DEFAULT_CLI_OPTION = {
     "jauthor": True,
     "revjauthor": False,
     "save_doi": False,
+    "sort": "id",
 }
 
 
 if __name__ == "__main__":
     args = parse_args()
     bibtex_str = args.bibfile.read()
-    args.outfile.write(bibtex_cleaner(bibtex_str, DEFAULT_CLI_OPTION))
+    option = {**DEFAULT_CLI_OPTION, "sort": args.sort}
+    args.outfile.write(bibtex_cleaner(bibtex_str, option))

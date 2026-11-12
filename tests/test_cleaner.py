@@ -507,3 +507,32 @@ year = {1998}
     ret = bibtex_cleaner(bibtext, option)
     cleaned = "@article{Watts1998,\n  author = {Watts, Duncan J and Strogatz, Steven H},\n  journal = {Nature},\n  number = {6684},\n  pages = {440--442},\n  title = {{Collective dynamics of `small-world' networks}},\n  volume = {393},\n  year = {1998}\n}\n"
     assert ret == cleaned
+
+
+SORT_BIB = """
+@misc{Zeta2020,
+  author = {Zeta, Z},
+  title = {Z},
+  year = {2020},
+}
+@misc{Alpha2021,
+  author = {Alpha, A},
+  title = {A},
+  year = {2021},
+}
+"""
+
+
+def test_bibtex_cleaner_sort_default_is_id():
+    result = bibtex_cleaner(SORT_BIB, DEFAULT_OPTION)
+    assert result.index("Alpha2021") < result.index("Zeta2020")
+
+
+def test_bibtex_cleaner_sort_id():
+    result = bibtex_cleaner(SORT_BIB, {**DEFAULT_OPTION, "sort": "id"})
+    assert result.index("Alpha2021") < result.index("Zeta2020")
+
+
+def test_bibtex_cleaner_sort_input():
+    result = bibtex_cleaner(SORT_BIB, {**DEFAULT_OPTION, "sort": "input"})
+    assert result.index("Zeta2020") < result.index("Alpha2021")

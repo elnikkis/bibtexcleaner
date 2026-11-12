@@ -39,3 +39,21 @@ def test_clean_unexpected_exception_returns_error_message(client, monkeypatch):
     body = res.get_data(as_text=True)
     assert body.startswith("Error.")
     assert "unexpected" not in body
+
+
+SORT_BIB = "@misc{Zeta2020, title={Z}, year={2020}}\n@misc{Alpha2021, title={A}, year={2021}}\n"
+
+
+def test_clean_sort_input(client):
+    res = client.post("/clean", data={"fromtext": "1", "bibtext": SORT_BIB, "sort": "input"})
+    body = res.get_data(as_text=True)
+    assert body.index("Zeta2020") < body.index("Alpha2021")
+
+
+@pytest.mark.parametrize("sort", [None, "id", "bogus"])
+def test_clean_sort_defaults_to_id(client, sort):
+    data = {"fromtext": "1", "bibtext": SORT_BIB}
+    if sort is not None:
+        data["sort"] = sort
+    body = client.post("/clean", data=data).get_data(as_text=True)
+    assert body.index("Alpha2021") < body.index("Zeta2020")
