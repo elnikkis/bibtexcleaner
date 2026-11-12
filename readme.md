@@ -16,7 +16,7 @@ BibTeX entries exported from tools like Google Scholar or Zotero often contain m
 - **Japanese author names** — removes the comma separator in `姓, 名` formatted Japanese names
 - **Reverse Japanese author order** — swaps to `名 姓` order
 - **Keep DOI** — optionally retain the `doi` field even when stripping other extras
-- **Output order** — sort entries by citation key (default) or keep the input order
+- **Output order** — keep the input order (default) or sort entries by citation key
 
 **Formatting normalizations applied automatically:**
 
@@ -39,8 +39,8 @@ Then open http://localhost:8000.
 python cleaner.py input.bib output.bib
 # or
 python cleaner.py < input.bib > output.bib
-# keep the input order instead of sorting by citation key
-python cleaner.py --sort input input.bib output.bib
+# sort entries by citation key instead of keeping the input order
+python cleaner.py --sort id input.bib output.bib
 ```
 
 ## Development

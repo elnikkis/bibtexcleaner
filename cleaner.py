@@ -300,7 +300,7 @@ def bibtex_cleaner(bibtext, option):
         cleaned_database = clean_entries(bib_database, option)
         writer = BibTexWriter()
         writer.indent = "  "
-        if option.get("sort", "id") == "input":
+        if option.get("sort", "input") == "input":
             # 並び替えず入力順のまま出力する
             writer.order_entries_by = None
         else:
@@ -331,8 +331,8 @@ def parse_args():
     parser.add_argument(
         "--sort",
         choices=SORT_ORDERS,
-        default="id",
-        help="出力エントリの並び順（id: ID順, input: 入力順; default: id）",
+        default="input",
+        help="出力エントリの並び順（input: 入力順, id: ID順; default: input）",
     )
     return parser.parse_args()
 
@@ -344,7 +344,7 @@ DEFAULT_CLI_OPTION = {
     "jauthor": True,
     "revjauthor": False,
     "save_doi": False,
-    "sort": "id",
+    "sort": "input",
 }
 
 

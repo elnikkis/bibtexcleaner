@@ -523,9 +523,9 @@ SORT_BIB = """
 """
 
 
-def test_bibtex_cleaner_sort_default_is_id():
+def test_bibtex_cleaner_sort_default_is_input():
     result = bibtex_cleaner(SORT_BIB, DEFAULT_OPTION)
-    assert result.index("Alpha2021") < result.index("Zeta2020")
+    assert result.index("Zeta2020") < result.index("Alpha2021")
 
 
 def test_bibtex_cleaner_sort_id():

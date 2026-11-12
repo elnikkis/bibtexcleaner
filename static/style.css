@@ -102,7 +102,17 @@ main {
   cursor: pointer;
 }
 
-.settings-grid input[type="checkbox"] {
+.settings-grid .radio-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.settings-grid input[type="checkbox"],
+.settings-grid input[type="radio"] {
   flex-shrink: 0;
   width: 1em;
   height: 1em;

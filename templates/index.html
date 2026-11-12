@@ -27,12 +27,11 @@
           <label><input type="checkbox" name="jauthor" checked>日本人著者名のカンマを除去する</label>
           <label><input type="checkbox" name="revjauthor">日本人著者の姓と名を入れ替える</label>
           <label><input type="checkbox" name="save_doi">DOIフィールドを保持する</label>
-          <label>出力順：
-            <select name="sort">
-              <option value="id" selected>ID順</option>
-              <option value="input">入力順</option>
-            </select>
-          </label>
+          <div class="radio-group">
+            <span>出力順：</span>
+            <label><input type="radio" name="sort" value="input" checked>入力順</label>
+            <label><input type="radio" name="sort" value="id">ID順</label>
+          </div>
         </div>
 
         <!-- タブ -->
@@ -239,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 設定値の保存・復元 (localStorage)
   const SETTINGS_KEY = 'bibtexcleaner.settings';
-  const settingInputs = document.querySelectorAll('.settings-grid input[type="checkbox"], .settings-grid select');
+  const settingInputs = document.querySelectorAll('.settings-grid input[type="checkbox"], .settings-grid input[type="radio"]');
 
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
@@ -247,9 +246,12 @@ document.addEventListener('DOMContentLoaded', function() {
       const value = saved[input.name];
       if (input.type === 'checkbox') {
         if (typeof value === 'boolean') input.checked = value;
-      } else if (typeof value === 'string' &&
-                 Array.prototype.some.call(input.options, function(o) { return o.value === value; })) {
-        input.value = value;
+      } else if (input.type === 'radio') {
+        // 保存値に一致するラジオボタンがあるときだけ選択を変える
+        const hasMatch = Array.prototype.some.call(settingInputs, function(i) {
+          return i.type === 'radio' && i.name === input.name && i.value === value;
+        });
+        if (hasMatch) input.checked = (input.value === value);
       }
     });
   } catch (err) {
@@ -259,7 +261,11 @@ document.addEventListener('DOMContentLoaded', function() {
   function saveSettings() {
     const values = {};
     settingInputs.forEach(function(input) {
-      values[input.name] = input.type === 'checkbox' ? input.checked : input.value;
+      if (input.type === 'checkbox') {
+        values[input.name] = input.checked;
+      } else if (input.type === 'radio' && input.checked) {
+        values[input.name] = input.value;
+      }
     });
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(values));

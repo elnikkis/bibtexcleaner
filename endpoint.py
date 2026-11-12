@@ -45,8 +45,8 @@ def clean():
                 option[opt] = True
             else:
                 option[opt] = False
-        sort = request.form.get("sort", "id")
-        option["sort"] = sort if sort in SORT_ORDERS else "id"
+        sort = request.form.get("sort", "input")
+        option["sort"] = sort if sort in SORT_ORDERS else "input"
 
         try:
             cleaned = bibtex_cleaner(bibtext, option)
