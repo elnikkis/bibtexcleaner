@@ -156,17 +156,6 @@ def parse_field_list(text):
     return result
 
 
-def print_required_fields_as_html():
-    """Cleanerが残すフィールド定義辞書の中身を出力する"""
-    fd = sys.stdout
-    print("<dl>", file=fd)
-    for key, value in required_fields.items():
-        print("<dt>%s</dt>" % key, file=fd)
-        for field in value:
-            print("<dd>%s</dd>" % field, file=fd)
-    print("</dl>", file=fd)
-
-
 def _is_japanese(string):
     """文字列が日本語かを判定する
 
