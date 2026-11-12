@@ -77,6 +77,84 @@ class CleanerException(Exception):
 # 出力エントリの並び順: "id" = ID（引用キー）順, "input" = 入力順
 SORT_ORDERS = ("id", "input")
 
+# 残す・消すフィールドとして受け付けるフィールド名
+FIELD_NAME_RE = re.compile(r"[a-z][a-z0-9_.\-]*")
+MAX_FIELD_NAME_LENGTH = 64
+MAX_FIELDS_PER_TYPE = 50
+
+
+def normalize_field_name(name):
+    """フィールド名を小文字に正規化する。不正な名前ならNoneを返す"""
+    if not isinstance(name, str):
+        return None
+    name = name.strip().lower()
+    if len(name) > MAX_FIELD_NAME_LENGTH or not FIELD_NAME_RE.fullmatch(name):
+        return None
+    return name
+
+
+def sanitize_field_settings(data):
+    """既定からの差分として指定された「残す・消すフィールド」の設定を検証する
+
+    Args:
+        data: {"add": {entrytype: [field, ...]}, "remove": {entrytype: [field, ...]}}
+            の形の値。外部入力なので不正な値は黙って無視する。
+
+    Returns:
+        dict: 検証済みの同じ形の辞書
+    """
+    result = {"add": {}, "remove": {}}
+    if not isinstance(data, dict):
+        return result
+    for kind in ("add", "remove"):
+        per_type = data.get(kind)
+        if not isinstance(per_type, dict):
+            continue
+        for entrytype, names in per_type.items():
+            if entrytype not in required_fields or not isinstance(names, list):
+                continue
+            fields = []
+            for name in names[:MAX_FIELDS_PER_TYPE]:
+                name = normalize_field_name(name)
+                if name and name not in fields:
+                    fields.append(name)
+            if fields:
+                result[kind][entrytype] = fields
+    return result
+
+
+def parse_field_list(text):
+    """CLI用。"doi, url, inproceedings:publisher" のような指定を解釈する
+
+    "field" は全エントリタイプ、"entrytype:field" はそのタイプだけに適用する。
+
+    Returns:
+        dict: {entrytype: [field, ...]}
+    Raises:
+        ValueError: 不正なフィールド名・エントリタイプが含まれる場合
+    """
+    result = {}
+    for token in re.split(r"[,\s]+", text.strip()):
+        if not token:
+            continue
+        if ":" in token:
+            entrytype, name = token.split(":", 1)
+            entrytype = entrytype.strip().lower()
+            if entrytype not in required_fields:
+                raise ValueError(f"Unknown entry type: {entrytype}")
+            types = [entrytype]
+        else:
+            name = token
+            types = list(required_fields)
+        field = normalize_field_name(name)
+        if field is None:
+            raise ValueError(f"Invalid field name: {name}")
+        for t in types:
+            fields = result.setdefault(t, [])
+            if field not in fields:
+                fields.append(field)
+    return result
+
 
 def print_required_fields_as_html():
     """Cleanerが残すフィールド定義辞書の中身を出力する"""
@@ -216,22 +294,37 @@ def _treat_japanese_author(entry, reverse_author: bool):
     return entry
 
 
+def _field_sets(entrytype, option):
+    """エントリタイプごとに、加工に使うフィールドと出力するフィールドを求める
+
+    Returns:
+        tuple[set, set]: (加工に使うフィールド, 出力するフィールド)
+            ユーザーが既定から外したフィールド（author, yearなど）も、
+            ID生成などの加工には使えるように前者には含める。
+    """
+    try:
+        defaults = required_fields[entrytype]
+    except KeyError:
+        raise CleanerException(f"Unknown entry type: {entrytype}")
+    settings = option.get("fields") or {}
+    added = set(settings.get("add", {}).get(entrytype, ()))
+    removed = set(settings.get("remove", {}).get(entrytype, ()))
+    # 旧オプション: DOIフィールドを保持（CLI・APIとの互換のため残す）
+    if option.get("save_doi"):
+        added.add("doi")
+    working = set(defaults) | added
+    return working, working - removed
+
+
 def clean_entry(entry, option):
     # 必要なフィールドだけ取り出す
-    try:
-        needs = required_fields[entry["ENTRYTYPE"]]
-    except KeyError:
-        raise CleanerException(f"Unknown entry type: {entry['ENTRYTYPE']}")
+    working, output = _field_sets(entry["ENTRYTYPE"], option)
     e = {}
     e["ID"] = entry["ID"]
     e["ENTRYTYPE"] = entry["ENTRYTYPE"]
     for item in entry.keys():
-        if item in needs:
+        if item in working:
             e[item] = entry[item]
-
-    # オプションでDOIフィールドを保持
-    if option.get("save_doi") and "doi" in entry:
-        e["doi"] = entry["doi"]
 
     # 日本人ぽいauthorは姓名のあいだの,を消す
     if option["jauthor"]:
@@ -245,6 +338,11 @@ def clean_entry(entry, option):
     # 引用keyをauthor+yearで置き換える
     if option["replaceid"]:
         e["ID"] = _make_id(e)
+
+    # 加工のためだけに残していたフィールドを取り除く
+    for key in list(e.keys()):
+        if key not in ("ID", "ENTRYTYPE") and key not in output:
+            del e[key]
 
     # authorをlistからstrに戻す
     if "author" in e:
@@ -313,6 +411,12 @@ def bibtex_cleaner(bibtext, option):
 def parse_args():
     import argparse
 
+    def field_list(text):
+        try:
+            return parse_field_list(text)
+        except ValueError as e:
+            raise argparse.ArgumentTypeError(str(e))
+
     parser = argparse.ArgumentParser(description="Bibtex cleaner")
     parser.add_argument(
         "bibfile",
@@ -334,6 +438,20 @@ def parse_args():
         default="input",
         help="出力エントリの並び順（input: 入力順, id: ID順; default: input）",
     )
+    parser.add_argument(
+        "--keep",
+        type=field_list,
+        default={},
+        metavar="FIELDS",
+        help="既定に加えて残すフィールド（例: doi,url,inproceedings:publisher）",
+    )
+    parser.add_argument(
+        "--drop",
+        type=field_list,
+        default={},
+        metavar="FIELDS",
+        help="既定から取り除くフィールド（例: note,month,article:number）",
+    )
     return parser.parse_args()
 
 
@@ -351,5 +469,9 @@ DEFAULT_CLI_OPTION = {
 if __name__ == "__main__":
     args = parse_args()
     bibtex_str = args.bibfile.read()
-    option = {**DEFAULT_CLI_OPTION, "sort": args.sort}
+    option = {
+        **DEFAULT_CLI_OPTION,
+        "sort": args.sort,
+        "fields": {"add": args.keep, "remove": args.drop},
+    }
     args.outfile.write(bibtex_cleaner(bibtex_str, option))

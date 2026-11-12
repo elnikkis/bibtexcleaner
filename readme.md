@@ -15,7 +15,7 @@ BibTeX entries exported from tools like Google Scholar or Zotero often contain m
 - **Replace citation keys** — regenerates keys in `Author2024` format from author and year fields
 - **Japanese author names** — removes the comma separator in `姓, 名` formatted Japanese names
 - **Reverse Japanese author order** — swaps to `名 姓` order
-- **Keep DOI** — optionally retain the `doi` field even when stripping other extras
+- **Choose kept fields** — in the "残すフィールドの設定" panel, toggle fields per entry type, or for all types at once (e.g. keep `doi` / `url`, drop `note`). Settings are saved in the browser
 - **Output order** — keep the input order (default) or sort entries by citation key
 
 **Formatting normalizations applied automatically:**
@@ -41,6 +41,8 @@ python cleaner.py input.bib output.bib
 python cleaner.py < input.bib > output.bib
 # sort entries by citation key instead of keeping the input order
 python cleaner.py --sort id input.bib output.bib
+# keep extra fields / drop default fields ("type:field" applies to one entry type only)
+python cleaner.py --keep doi,url,inproceedings:publisher --drop note input.bib output.bib
 ```
 
 ## Development

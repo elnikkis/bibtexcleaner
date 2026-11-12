@@ -284,32 +284,124 @@ main {
   color: #555;
 }
 
-dl.fieldlist {
-  margin: 0.5rem 0 0;
+.field-summary {
+  margin-left: 0.5em;
+  font-weight: normal;
+  color: var(--primary);
 }
 
-dl.fieldlist dt {
-  float: left;
-  clear: left;
-  width: 130px;
-  text-align: right;
-  font-weight: 600;
+.field-reference-body p {
+  margin: 0.5rem 0;
 }
 
-dl.fieldlist dt::after {
-  content: ":";
-}
-
-dl.fieldlist dd {
-  float: left;
+.field-reference-body h2,
+.field-reference-body h3 {
   margin: 0;
-  padding-left: 0.5em;
+  font-size: 16px;
+  font-weight: 600;
+  color: #555;
 }
 
-dl.fieldlist::after {
-  content: "";
-  display: block;
-  clear: both;
+.bulk-fields {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fafafa;
+}
+
+.bulk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip-list label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.field-legend {
+  font-size: 14px;
+  color: #888;
+}
+
+.field-add {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.field-add input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 16px;
+}
+
+.small-btn {
+  padding: 0.2rem 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.small-btn:hover {
+  background: var(--bg);
+}
+
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.type-card {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.type-field-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.25rem;
+}
+
+.type-field-list label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+/* 既定から外したフィールドは取り消し線、追加したフィールドは色付き */
+.type-field-list .field-default input:not(:checked) + span {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+.type-field-list .field-added span {
+  color: var(--primary);
 }
 
 footer {
